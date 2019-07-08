@@ -1,0 +1,6 @@
+[general]
+# Telegram ID of the master account
+masterid = 1234578
+
+[database]
+password = "password"

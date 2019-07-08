@@ -1,0 +1,17 @@
+[package]
+name = "SpamWatchAPI"
+version = "0.1.0"
+authors = ["SitiSchu <admin@sitischu.com>"]
+edition = "2018"
+homepage = "https://github.com/SpamWatch/SpamWatchAPI"
+repository = "https://github.com/SpamWatch/SpamWatchAPI"
+
+[dependencies]
+nanoid = "0.2"
+config = "0.9"
+rocket = "0.4"
+slog = "2.4"
+sloggers = "0.3"
+postgres = { version = "0.16.0-rc.2", features = ["with-serde_json-1"] }
+slog-term = "2.4"
+serde_json = "1.0"
