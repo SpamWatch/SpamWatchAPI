@@ -3,6 +3,7 @@ name = "SpamWatchAPI"
 version = "0.1.0"
 authors = ["SitiSchu <admin@sitischu.com>"]
 edition = "2018"
+description = "API for t.me/SpamWatch to query User IDs for their ban status and reason."
 homepage = "https://github.com/SpamWatch/SpamWatchAPI"
 repository = "https://github.com/SpamWatch/SpamWatchAPI"
 
