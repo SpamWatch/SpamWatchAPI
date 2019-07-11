@@ -16,6 +16,9 @@ mod utils;
 mod routes;
 mod response;
 
+#[cfg(test)]
+mod tests;
+
 fn setup_database() {
     let mut postgresql = Database::new();
     postgresql.setup_tables();
