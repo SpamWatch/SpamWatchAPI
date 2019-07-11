@@ -14,6 +14,7 @@ mod settings;
 mod database;
 mod utils;
 mod routes;
+mod response;
 
 fn setup_database() {
     let mut postgresql = Database::new();
@@ -23,7 +24,7 @@ fn setup_database() {
 
 
 fn rocket() -> Rocket {
-    rocket::ignite().mount("/", routes![routes::root::info, routes::root::version])
+    rocket::ignite().mount("/", routes![routes::root::info, routes::root::version, routes::root::version_part])
 }
 
 
