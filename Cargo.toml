@@ -10,7 +10,7 @@ repository = "https://github.com/SpamWatch/SpamWatchAPI"
 [dependencies]
 nanoid = "0.2"
 config = "0.9"
-rocket = "0.4"
+actix-web = "1.0.3"
 slog = "2.4"
 sloggers = "0.3"
 postgres = { version = "0.16.0-rc.2", features = ["with-serde_json-1"] }
