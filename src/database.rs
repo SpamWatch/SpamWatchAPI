@@ -12,16 +12,16 @@ pub struct Database {
 }
 
 impl Database {
-    pub fn new(cfg: Settings) -> Result<Database, postgres::Error> {
+    pub fn new() -> Result<Database, Box<std::error::Error>> {
         let logger = utils::logger();
-
+        let cfg = Settings::load()?;
         debug!(logger, "Connecting to database";
-         "host" => &cfg.database.address,
+         "host" => &cfg.database.host,
          "port" => &cfg.database.port,
          "name" => &cfg.database.name,
          "username" => &cfg.database.username);
         let conn = Config::new()
-            .host(&cfg.database.address)
+            .host(&cfg.database.host)
             .port(cfg.database.port)
             .dbname(&cfg.database.name)
             .user(&cfg.database.username)

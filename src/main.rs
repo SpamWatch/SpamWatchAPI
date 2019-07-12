@@ -32,7 +32,7 @@ fn main() -> Result<(), Box<std::error::Error>> {
         warn!(logger, "MasterID not set. Defaulting to Telegrams id (777000). To avoid this set `masterid` under the `general` section in the config.")
     }
     info!(logger, "Master ID is {}", cfg.masterid);
-    setup_database(Database::new(cfg)?)?;
+    setup_database(Database::new()?)?;
 
     fn greet(req: HttpRequest) -> impl Responder {
         let name = req.match_info().get("name").unwrap_or("World");
