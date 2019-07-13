@@ -3,7 +3,11 @@ use serde_json::json;
 
 pub fn info() -> HttpResponse {
     HttpResponse::Ok()
-        .body(format!("{} v{} by {}\n{}\n\n{}",
+        .content_type("text/html")
+        .body(format!(r#"
+                <style>* {{font-family: monospace;}}</style>
+                {} v{} by {}<br>{}<br><br><a href={}>GitHub</a><br>
+                <a href=https://t.me/SpamWatch>Channel</a>"#,
                       &env!("CARGO_PKG_NAME"),
                       &env!("CARGO_PKG_VERSION"),
                       &env!("CARGO_PKG_AUTHORS"),
