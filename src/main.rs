@@ -5,17 +5,17 @@ use actix_web::{App, guard, HttpResponse, HttpServer, web};
 use actix_web::middleware::Logger;
 
 use crate::database::Database;
-use crate::settings::Settings;
 
-mod database;
+#[macro_use]
 mod utils;
-mod routes;
 mod settings;
+mod database;
 
+mod routes;
 #[cfg(test)]
 mod tests;
 
-fn setup_database(mut postgresql: Database) -> Result<(), postgres::Error> {
+fn setup_database(mut postgresql: Database) -> Result<(), Box<std::error::Error>> {
     postgresql.setup_tables()?;
     postgresql.create_genesis_token()?;
     Ok(())
@@ -25,16 +25,17 @@ fn setup_database(mut postgresql: Database) -> Result<(), postgres::Error> {
 fn main() -> Result<(), Box<std::error::Error>> {
     let logger = utils::logger();
     info!(logger, "Starting {}", env!("CARGO_PKG_NAME"); "version" => &env!("CARGO_PKG_VERSION"));
-    let cfg = Settings::load()?;
-    if cfg.masterid == 777000 {
+    if config!(masterid) == 777000 {
         warn!(logger, "MasterID not set. Defaulting to Telegrams id (777000). To avoid this set `masterid` under the `general` section in the config.")
     }
-    info!(logger, "Master ID is {}", cfg.masterid);
+    info!(logger, "Master ID is {}", config!(masterid));
     setup_database(Database::new()?)?;
 
     std::env::set_var("RUST_LOG", "actix_web=debug");
     env_logger::init();
 
+    let location = format!("{}:{}", config!(server.host), config!(server.port));
+    info!(logger, "Starting Server on {}", location);
     HttpServer::new(|| {
         App::new()
             .wrap(Logger::new(r#" %a %t "%r" %s %b "%{Referer}i" "%{User-Agent}i" %D"#))
@@ -49,7 +50,7 @@ fn main() -> Result<(), Box<std::error::Error>> {
                     .to(|| HttpResponse::MethodNotAllowed())
                     .to(routes::root::version)))
     })
-        .bind(format!("{}:{}", cfg.server.host, cfg.server.port))?
+        .bind(location)?
         .run()?;
     Ok(())
 }
