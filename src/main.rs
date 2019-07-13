@@ -41,7 +41,7 @@ fn main() -> Result<(), Box<std::error::Error>> {
             .wrap(Logger::new(r#" %a %t "%r" %s %b "%{Referer}i" "%{User-Agent}i" %D"#))
             .service(web::resource("/").route(
                 web::route()
-                    .guard(guard::Get())
+                    .guard(guard::Any(guard::Get()).or(guard::Head()))
                     .to(|| HttpResponse::MethodNotAllowed())
                     .to(routes::root::info)))
             .service(web::resource("/version").route(
