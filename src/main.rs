@@ -1,17 +1,15 @@
 #[macro_use]
 extern crate slog;
 
-use actix_web::{App, HttpRequest, HttpServer, Responder, web};
-use config::ConfigError;
-use sloggers;
-use sloggers::types::Severity::Critical;
+use actix_web::{App, guard, HttpResponse, HttpServer, web};
+use actix_web::middleware::Logger;
 
 use crate::database::Database;
 use crate::settings::Settings;
 
 mod database;
 mod utils;
-//mod routes;
+mod routes;
 mod settings;
 
 #[cfg(test)]
@@ -34,19 +32,24 @@ fn main() -> Result<(), Box<std::error::Error>> {
     info!(logger, "Master ID is {}", cfg.masterid);
     setup_database(Database::new()?)?;
 
-    fn greet(req: HttpRequest) -> impl Responder {
-        let name = req.match_info().get("name").unwrap_or("World");
-        format!("Hello {}!", &name)
-    }
+    std::env::set_var("RUST_LOG", "actix_web=debug");
+    env_logger::init();
 
     HttpServer::new(|| {
         App::new()
-            .route("/", web::get().to(greet))
-            .route("/{name}", web::get().to(greet))
+            .wrap(Logger::new(r#" %a %t "%r" %s %b "%{Referer}i" "%{User-Agent}i" %D"#))
+            .service(web::resource("/").route(
+                web::route()
+                    .guard(guard::Get())
+                    .to(|| HttpResponse::MethodNotAllowed())
+                    .to(routes::root::info)))
+            .service(web::resource("/version").route(
+                web::route()
+                    .guard(guard::Get())
+                    .to(|| HttpResponse::MethodNotAllowed())
+                    .to(routes::root::version)))
     })
-        .bind("127.0.0.1:8000")
-        .expect("Can not bind to port 8000")
-        .run()
-        .unwrap();
+        .bind(format!("{}:{}", cfg.server.host, cfg.server.port))?
+        .run()?;
     Ok(())
 }

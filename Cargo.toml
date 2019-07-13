@@ -10,9 +10,13 @@ repository = "https://github.com/SpamWatch/SpamWatchAPI"
 [dependencies]
 nanoid = "0.2"
 config = "0.9"
-actix-web = "1.0.3"
+actix-web = "1.0"
+env_logger= "0.6"
 slog = "2.4"
 sloggers = "0.3"
 postgres = { version = "0.16.0-rc.2", features = ["with-serde_json-1"] }
 slog-term = "2.4"
 serde_json = "1.0"
+
+[dev-dependencies]
+actix-service = "0.4"

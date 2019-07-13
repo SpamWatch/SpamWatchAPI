@@ -1,9 +1,9 @@
 use postgres::{Client, Config, NoTls};
+use serde_json::{json, Value};
 use slog::Logger;
 
 use crate::settings::Settings;
 use crate::utils;
-use serde_json::{Value, json};
 
 pub struct Database {
     conn: Client,
@@ -43,7 +43,7 @@ impl Database {
         Ok(())
     }
 
-    pub fn create_genesis_token(&mut self)  -> Result<(), postgres::Error> {
+    pub fn create_genesis_token(&mut self) -> Result<(), postgres::Error> {
         let logger = utils::logger();
         let get_genesis_token = "SELECT * FROM tokens WHERE id = 1;";
         debug!(self.logger, "Checking if Genesis Token exists"; "query" => get_genesis_token);
