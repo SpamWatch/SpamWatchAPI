@@ -1,4 +1,9 @@
+use std::path::PathBuf;
+
 use config::{Config, ConfigError, Environment, File};
+use dirs::home_dir;
+
+use crate::utils;
 
 #[derive(Debug)]
 pub struct DatabaseCfg {
@@ -25,6 +30,14 @@ pub struct Settings {
 
 impl Settings {
     pub fn load() -> Result<Settings, ConfigError> {
+        let logger = utils::logger();
+        let home_config: PathBuf = match home_dir() {
+            Some(path) => [path, PathBuf::from(&format!(".config/{}/config", &env!("CARGO_PKG_NAME")))].iter().collect(),
+            None => {
+                debug!(logger, "Can't get home directory");
+                PathBuf::from("config")
+            }
+        };
         let mut settings = Config::default();
         settings.set_default("database.host", "127.0.0.1")?;
         settings.set_default("database.port", 5432)?;
@@ -37,7 +50,11 @@ impl Settings {
         settings.set_default("general.masterid", 777000)?;
         settings.set_default("general.token_size", 64)?;
         settings
-            .merge(File::with_name("config"))?
+            .merge(File::with_name(&format!("/etc/{}/config",
+                                            &env!("CARGO_PKG_NAME")))
+                .required(false))?
+            .merge(File::with_name(home_config.to_str().unwrap()).required(false))?
+            .merge(File::with_name("config").required(false))?
             .merge(Environment::with_prefix("APP"))?;
 
         Ok(Settings {
