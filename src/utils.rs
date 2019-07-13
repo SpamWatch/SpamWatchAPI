@@ -1,16 +1,13 @@
-use slog::Logger;
-use sloggers::Build;
-use sloggers::terminal::{Destination, TerminalLoggerBuilder};
-use sloggers::types::Severity;
-
-use crate::settings;
+use slog::{Drain, Logger};
+use slog_async;
+use slog_term;
 
 pub fn logger() -> Logger {
-    TerminalLoggerBuilder::new()
-        .level(Severity::Debug)
-        .destination(Destination::Stderr)
-        .build()
-        .unwrap()
+    let decorator = slog_term::TermDecorator::new().force_color().build();
+    let drain = slog_term::CompactFormat::new(decorator).build().fuse();
+    let drain = slog_async::Async::new(drain).build().fuse();
+
+    Logger::root(drain, o!())
 }
 
 #[macro_export]
