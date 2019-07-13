@@ -32,7 +32,7 @@ impl Settings {
         settings.set_default("database.username", "SpamWatchAPI")?;
 
         settings.set_default("server.host", "127.0.0.1")?;
-        settings.set_default("server.port", 8000)?;
+        settings.set_default("server.port", 6345)?;
 
         settings.set_default("general.masterid", 777000)?;
         settings.set_default("general.token_size", 64)?;
