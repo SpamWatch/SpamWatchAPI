@@ -31,14 +31,10 @@ fn main() -> Result<(), Box<std::error::Error>> {
     info!(logger, "Master ID is {}", config!(masterid));
     setup_database(Database::new()?)?;
 
-    std::env::set_var("RUST_LOG", "actix_web=debug");
-    env_logger::init();
-
     let location = format!("{}:{}", config!(server.host), config!(server.port));
     info!(logger, "Starting Server on {}", location);
     HttpServer::new(|| {
         App::new()
-            .wrap(Logger::new(r#" %a %t "%r" %s %b "%{Referer}i" "%{User-Agent}i" %D"#))
             .service(web::resource("/").route(
                 web::route()
                     .guard(guard::Any(guard::Get()).or(guard::Head()))
