@@ -1,8 +1,9 @@
 #[macro_use]
 extern crate slog;
 
+use std::process::exit;
+
 use actix_web::{App, guard, HttpResponse, HttpServer, web};
-use actix_web::middleware::Logger;
 
 use crate::database::Database;
 
@@ -15,22 +16,31 @@ mod routes;
 #[cfg(test)]
 mod tests;
 
-fn setup_database(mut postgresql: Database) -> Result<(), Box<std::error::Error>> {
-    postgresql.setup_tables()?;
-    postgresql.create_genesis_token()?;
-    Ok(())
+fn setup_database() -> Result<i32, Box<std::error::Error>> {
+    let logger = utils::logger();
+    let mut db = match Database::new() {
+        Ok(d) => d,
+        Err(e) => {
+            error!(logger, "A Error occured while connecting to PostgreSQL"; "error" => e.to_string());
+            return Ok(1)
+        }
+    };
+    db.setup_tables()?;
+    db.create_genesis_token()?;
+    Ok(0)
 }
 
-
-fn main() -> Result<(), Box<std::error::Error>> {
+fn run() -> Result<i32, Box<std::error::Error>> {
     let logger = utils::logger();
     info!(logger, "Starting {}", env!("CARGO_PKG_NAME"); "version" => &env!("CARGO_PKG_VERSION"));
     if config!(masterid) == 777000 {
         warn!(logger, "MasterID not set. Defaulting to Telegrams id (777000). To avoid this set `masterid` under the `general` section in the config.")
     }
     info!(logger, "Master ID is {}", config!(masterid));
-    setup_database(Database::new()?)?;
-
+    let db_code = setup_database()?;
+    if db_code > 0 {
+        return Ok(db_code)
+    }
     let location = format!("{}:{}", config!(server.host), config!(server.port));
     info!(logger, "Starting Server on {}", location);
     HttpServer::new(|| {
@@ -45,8 +55,19 @@ fn main() -> Result<(), Box<std::error::Error>> {
                     .guard(guard::Get())
                     .to(|| HttpResponse::MethodNotAllowed())
                     .to(routes::root::version)))
+            .service(web::resource("/tokens").route(
+                web::route()
+                    .guard(guard::Get())
+                    .to(|| HttpResponse::MethodNotAllowed())
+                    .to(routes::tokens::get_tokens)))
     })
-        .bind(location)?
-        .run()?;
+        .bind(location).unwrap()
+        .run().unwrap();
+    Ok(0)
+}
+
+fn main() -> Result<(), Box<std::error::Error>> {
+    let exit_code = run()?;
+    exit(exit_code);
     Ok(())
 }
