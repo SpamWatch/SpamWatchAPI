@@ -1,4 +1,5 @@
-use postgres::{Client, Config, NoTls};
+use postgres::{Client, Config, NoTls, Row};
+use serde::Serialize;
 use serde_json::{json, Value};
 use slog::Logger;
 
@@ -8,6 +9,14 @@ use crate::utils;
 pub struct Database {
     conn: Client,
     logger: Logger,
+}
+
+#[derive(Debug, Serialize)]
+pub struct Token {
+    id: i32,
+    token: String,
+    permissions: Value,
+    userid: i32,
 }
 
 impl Database {
@@ -42,17 +51,30 @@ impl Database {
     }
 
     pub fn create_genesis_token(&mut self) -> Result<(), Box<std::error::Error>> {
-        let logger = utils::logger();
         let get_genesis_token = "SELECT * FROM tokens WHERE id = 1;";
         debug!(self.logger, "Checking if Genesis Token exists"; "query" => get_genesis_token);
         if self.conn.query(get_genesis_token, &[])?.is_empty() {
             info!(self.logger, "Genesis Token doesn't exist. Creating one"; "size" => config!(token_size));
             let token = self.create_token(json!({"all": "rw"}), config!(masterid))?;
-            info!(logger, "Created Genesis Token `{}`. Write this down, this will be the only time you see it.", token)
+            info!(self.logger, "Created Genesis Token `{}`. Write this down, this will be the only time you see it.", token)
         } else {
-            debug!(logger, "Genesis Token exists. Skipping creation.")
+            debug!(self.logger, "Genesis Token exists. Skipping creation.")
         }
         Ok(())
+    }
+
+    pub fn get_tokens(&mut self) -> Result<Vec<Token>, Box<std::error::Error>> {
+        let get_all_tokens = "SELECT * FROM tokens;";
+        debug!(self.logger, "Getting all tokens"; "query" => get_all_tokens);
+        let result: Vec<Row> = self.conn.query(get_all_tokens, &[])?;
+        Ok(result.into_iter()
+                 .map(|row| Token {
+                     id: row.get(0),
+                     token: row.get(1),
+                     permissions: row.get(2),
+                     userid: row.get(3),
+                 })
+                 .collect())
     }
 
     pub fn create_token(&mut self, permissions: Value, userid: i32) -> Result<String, Box<std::error::Error>> {
