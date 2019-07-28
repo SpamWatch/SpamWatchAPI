@@ -1,12 +1,13 @@
 #[macro_use]
 extern crate postgres;
-
 #[macro_use]
 extern crate slog;
 
 use std::process::exit;
 
 use actix_web::{App, guard, HttpResponse, HttpServer, web};
+
+use utils::BoxResult;
 
 use crate::database::Database;
 
@@ -20,7 +21,7 @@ mod routes;
 #[cfg(test)]
 mod tests;
 
-fn setup_database() -> Result<i32, Box<std::error::Error>> {
+fn setup_database() -> BoxResult<i32> {
     let logger = utils::logger();
     let mut db = match Database::new() {
         Ok(d) => d,
@@ -34,7 +35,7 @@ fn setup_database() -> Result<i32, Box<std::error::Error>> {
     Ok(0)
 }
 
-fn run() -> Result<i32, Box<std::error::Error>> {
+fn run() -> BoxResult<i32> {
     let logger = utils::logger();
     info!(logger, "Starting {}", env!("CARGO_PKG_NAME"); "version" => &env!("CARGO_PKG_VERSION"));
     if config!(masterid) == 777000 {
@@ -75,7 +76,7 @@ fn run() -> Result<i32, Box<std::error::Error>> {
     Ok(0)
 }
 
-fn main() -> Result<(), Box<std::error::Error>> {
+fn main() -> BoxResult<()> {
     let exit_code = run()?;
     exit(exit_code);
 }

@@ -5,6 +5,7 @@ use slog::Logger;
 
 use crate::settings;
 use crate::utils;
+use crate::utils::BoxResult;
 
 #[derive(Debug, FromSql, ToSql, Serialize, Deserialize)]
 #[postgres(name = "permission")]
@@ -31,7 +32,7 @@ pub struct Token {
 }
 
 impl Database {
-    pub fn new() -> Result<Database, Box<std::error::Error>> {
+    pub fn new() -> BoxResult<Database> {
         let logger = utils::logger();
         debug!(logger, "Connecting to database";
          "host" => config!(database.host),
@@ -80,7 +81,7 @@ impl Database {
         Ok(())
     }
 
-    pub fn create_genesis_token(&mut self) -> Result<(), Box<std::error::Error>> {
+    pub fn create_genesis_token(&mut self) -> BoxResult<()> {
         let get_genesis_token = "SELECT * FROM tokens WHERE id = 1;";
         debug!(self.logger, "Checking if Genesis Token exists";
             "query" => get_genesis_token);
@@ -95,7 +96,7 @@ impl Database {
         Ok(())
     }
 
-    pub fn get_tokens(&mut self) -> Result<Vec<Token>, Box<std::error::Error>> {
+    pub fn get_tokens(&mut self) -> BoxResult<Vec<Token>> {
         let get_all_tokens = "SELECT * FROM tokens;";
         debug!(self.logger, "Getting all tokens"; "query" => get_all_tokens);
         let result: Vec<Row> = self.conn.query(get_all_tokens, &[])?;
@@ -109,7 +110,7 @@ impl Database {
                  .collect())
     }
 
-    pub fn get_token(&mut self, token_id: i32) -> Result<Vec<Token>, Box<std::error::Error>> {
+    pub fn get_token(&mut self, token_id: i32) -> BoxResult<Vec<Token>> {
         let get_token_by_id = "SELECT * FROM tokens WHERE id = $1;";
         debug!(self.logger, "Getting token by id";
             "id" => token_id, "query" => get_token_by_id);
@@ -125,7 +126,7 @@ impl Database {
                  .collect())
     }
 
-    pub fn create_token(&mut self, permission: Permission, userid: i32) -> Result<String, Box<std::error::Error>> {
+    pub fn create_token(&mut self, permission: Permission, userid: i32) -> BoxResult<String> {
         let token = nanoid::generate(config!(token_size) as usize);
         let insert_token = "
             INSERT INTO tokens (

@@ -2,6 +2,8 @@ use slog::{Drain, Logger};
 use slog_async;
 use slog_term;
 
+pub type BoxResult<T> = Result<T, Box<std::error::Error>>;
+
 pub fn logger() -> Logger {
     let decorator = slog_term::TermDecorator::new().force_color().build();
     let drain = slog_term::CompactFormat::new(decorator).build().fuse();
