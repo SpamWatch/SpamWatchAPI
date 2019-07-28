@@ -64,6 +64,11 @@ fn run() -> Result<i32, Box<std::error::Error>> {
                     .guard(guard::Get())
                     .to(|| HttpResponse::MethodNotAllowed())
                     .to(routes::tokens::get_tokens)))
+            .service(web::resource("/tokens/{id}").route(
+                web::route()
+                    .guard(guard::Get())
+                    .to(|| HttpResponse::MethodNotAllowed())
+                    .to(routes::tokens::get_token)))
     })
         .bind(location).unwrap()
         .run().unwrap();

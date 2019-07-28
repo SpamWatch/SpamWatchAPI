@@ -109,6 +109,22 @@ impl Database {
                  .collect())
     }
 
+    pub fn get_token(&mut self, token_id: i32) -> Result<Vec<Token>, Box<std::error::Error>> {
+        let get_token_by_id = "SELECT * FROM tokens WHERE id = $1;";
+        debug!(self.logger, "Getting token by id";
+            "id" => token_id, "query" => get_token_by_id);
+        let result: Vec<Row> = self.conn.query(get_token_by_id, &[&token_id])?;
+        // Since there shouldn't be more than one token for a ID taking the first index should be fine.
+        Ok(result.into_iter()
+                 .map(|row| Token {
+                     id: row.get(0),
+                     token: row.get(1),
+                     permissions: row.get(2),
+                     userid: row.get(3),
+                 })
+                 .collect())
+    }
+
     pub fn create_token(&mut self, permission: Permission, userid: i32) -> Result<String, Box<std::error::Error>> {
         let token = nanoid::generate(config!(token_size) as usize);
         let insert_token = "
