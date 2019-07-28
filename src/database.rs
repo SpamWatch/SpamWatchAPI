@@ -1,10 +1,21 @@
 use postgres::{Client, Config, NoTls, Row};
-use serde::Serialize;
-use serde_json::{json, Value};
+use postgres_derive::{FromSql, ToSql};
+use serde::{Deserialize, Serialize};
 use slog::Logger;
 
 use crate::settings;
 use crate::utils;
+
+#[derive(Debug, FromSql, ToSql, Serialize, Deserialize)]
+#[postgres(name = "permission")]
+pub enum Permission {
+    // Can read from the API
+    User,
+    // Can add IDs to the API
+    Admin,
+    // Can create/revoke tokens
+    Root,
+}
 
 pub struct Database {
     conn: Client,
@@ -15,7 +26,7 @@ pub struct Database {
 pub struct Token {
     id: i32,
     token: String,
-    permissions: Value,
+    permissions: Permission,
     userid: i32,
 }
 
@@ -44,8 +55,26 @@ impl Database {
         debug!(self.logger, "Creating Table if it doesn't exist"; "query" => create_banlist, "name" => "banlist");
         self.conn.simple_query(create_banlist)?;
 
-        let create_tokens = "CREATE TABLE IF NOT EXISTS tokens (id SERIAL, token Text NOT NULL PRIMARY KEY, permissions json NOT NULL, userid integer NOT NULL);";
-        debug!(self.logger, "Creating Table if it doesn't exist";"query" => create_tokens,  "name" => "tokens");
+        let permissions_enum = "
+            DO $$
+            BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'permission') THEN
+                    CREATE TYPE permission AS ENUM ('User', 'Admin', 'Root');
+                END IF;
+            END$$;";
+        debug!(self.logger, "Creating type `permission` if it doesn't exist";
+            "query" => permissions_enum, "name" => "banlist");
+        self.conn.simple_query(permissions_enum)?;
+
+        let create_tokens = "
+            CREATE TABLE IF NOT EXISTS tokens (
+                id SERIAL,
+                token Text NOT NULL PRIMARY KEY,
+                permissions permission NOT NULL,
+                userid integer NOT NULL);";
+
+        debug!(self.logger, "Creating Table if it doesn't exist";
+            "query" => create_tokens,  "name" => "tokens");
         self.conn.simple_query(create_tokens)?;
         Ok(())
     }
@@ -54,8 +83,9 @@ impl Database {
         let get_genesis_token = "SELECT * FROM tokens WHERE id = 1;";
         debug!(self.logger, "Checking if Genesis Token exists"; "query" => get_genesis_token);
         if self.conn.query(get_genesis_token, &[])?.is_empty() {
-            info!(self.logger, "Genesis Token doesn't exist. Creating one"; "size" => config!(token_size));
-            let token = self.create_token(json!({"all": "rw"}), config!(masterid))?;
+            info!(self.logger, "Genesis Token doesn't exist. Creating one";
+                "size" => config!(token_size));
+            let token = self.create_token(Permission::Root, config!(masterid))?;
             info!(self.logger, "Created Genesis Token `{}`. Write this down, this will be the only time you see it.", token)
         } else {
             debug!(self.logger, "Genesis Token exists. Skipping creation.")
@@ -77,11 +107,17 @@ impl Database {
                  .collect())
     }
 
-    pub fn create_token(&mut self, permissions: Value, userid: i32) -> Result<String, Box<std::error::Error>> {
+    pub fn create_token(&mut self, permission: Permission, userid: i32) -> Result<String, Box<std::error::Error>> {
         let token = nanoid::generate(config!(token_size) as usize);
-        let insert_token = "INSERT INTO tokens(token, permissions, userid) VALUES ($1, $2, $3);";
-        debug!(self.logger, "Creating Token"; "query" => insert_token);
-        self.conn.execute(insert_token, &[&token, &permissions, &userid])?;
+        let insert_token = "
+            INSERT INTO tokens (
+                token,
+                permissions,
+                userid)
+            VALUES ($1, $2, $3);";
+        debug!(self.logger, "Creating Token";
+         "query" => insert_token, "permission" => format!("{:?}", permission));
+        self.conn.execute(insert_token, &[&token, &permission, &userid])?;
         Ok(token)
     }
 }

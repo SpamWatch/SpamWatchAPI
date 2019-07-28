@@ -1,4 +1,7 @@
 #[macro_use]
+extern crate postgres;
+
+#[macro_use]
 extern crate slog;
 
 use std::process::exit;
