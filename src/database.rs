@@ -52,7 +52,8 @@ impl Database {
 
     pub fn setup_tables(&mut self) -> Result<(), postgres::Error> {
         let create_banlist = "CREATE TABLE IF NOT EXISTS banlist (id integer NOT NULL PRIMARY KEY, reason Text NOT NULL, date timestamp NOT NULL);";
-        debug!(self.logger, "Creating Table if it doesn't exist"; "query" => create_banlist, "name" => "banlist");
+        debug!(self.logger, "Creating Table if it doesn't exist";
+            "query" => create_banlist, "name" => "banlist");
         self.conn.simple_query(create_banlist)?;
 
         let permissions_enum = "
@@ -81,7 +82,8 @@ impl Database {
 
     pub fn create_genesis_token(&mut self) -> Result<(), Box<std::error::Error>> {
         let get_genesis_token = "SELECT * FROM tokens WHERE id = 1;";
-        debug!(self.logger, "Checking if Genesis Token exists"; "query" => get_genesis_token);
+        debug!(self.logger, "Checking if Genesis Token exists";
+            "query" => get_genesis_token);
         if self.conn.query(get_genesis_token, &[])?.is_empty() {
             info!(self.logger, "Genesis Token doesn't exist. Creating one";
                 "size" => config!(token_size));

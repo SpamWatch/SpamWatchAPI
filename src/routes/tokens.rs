@@ -1,12 +1,13 @@
-use actix_web::{HttpResponse, web};
+use std::fmt;
+
 use actix_web::{error, Result};
 use actix_web::http::StatusCode;
+use actix_web::HttpResponse;
 use failure::Fail;
 use serde_json::json;
 
 use crate::database::Database;
 use crate::utils;
-use std::fmt;
 
 #[derive(Fail, Debug)]
 pub enum UserError {
@@ -38,9 +39,21 @@ impl error::ResponseError for UserError {
 
 pub fn get_tokens() -> Result<HttpResponse, UserError> {
     let logger = utils::logger();
-    let mut db = Database::new().map_err(|e| {error!(logger, "{}", e); UserError::InternalError})?;
-    let tokens = db.get_tokens().map_err(|e| {error!(logger, "{}", e); UserError::InternalError})?;
-    let tokens_json = serde_json::to_value(tokens).map_err(|e| {error!(logger, "{}", e); UserError::InternalError})?;
+    let mut db = Database::new()
+        .map_err(|e| {
+            error!(logger, "{}", e);
+            UserError::InternalError
+        })?;
+    let tokens = db.get_tokens()
+                   .map_err(|e| {
+                       error!(logger, "{}", e);
+                       UserError::InternalError
+                   })?;
+    let tokens_json = serde_json::to_value(tokens)
+        .map_err(|e| {
+            error!(logger, "{}", e);
+            UserError::InternalError
+        })?;
 
     Ok(HttpResponse::Ok().json(tokens_json))
 }

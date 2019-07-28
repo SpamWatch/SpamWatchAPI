@@ -25,7 +25,7 @@ fn setup_database() -> Result<i32, Box<std::error::Error>> {
         Ok(d) => d,
         Err(e) => {
             error!(logger, "A Error occured while connecting to PostgreSQL"; "error" => e.to_string());
-            return Ok(1)
+            return Ok(1);
         }
     };
     db.setup_tables()?;
@@ -42,7 +42,7 @@ fn run() -> Result<i32, Box<std::error::Error>> {
     info!(logger, "Master ID is {}", config!(masterid));
     let db_code = setup_database()?;
     if db_code > 0 {
-        return Ok(db_code)
+        return Ok(db_code);
     }
     let location = format!("{}:{}", config!(server.host), config!(server.port));
     info!(logger, "Starting Server on {}", location);
@@ -72,5 +72,4 @@ fn run() -> Result<i32, Box<std::error::Error>> {
 fn main() -> Result<(), Box<std::error::Error>> {
     let exit_code = run()?;
     exit(exit_code);
-    Ok(())
 }
