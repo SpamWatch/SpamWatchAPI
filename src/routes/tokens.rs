@@ -37,7 +37,7 @@ pub fn get_token(req: HttpRequest) -> Result<HttpResponse, UserError> {
         error!(logger, "{}", e);
         UserError::BadRequest
     })?;
-    let token = db.get_token(token_id).map_err(|e| {
+    let token = db.get_token_by_id(token_id).map_err(|e| {
         error!(logger, "{}", e);
         UserError::Internal
     })?;

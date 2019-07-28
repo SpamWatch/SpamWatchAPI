@@ -110,7 +110,7 @@ impl Database {
                  .collect())
     }
 
-    pub fn get_token(&mut self, token_id: i32) -> BoxResult<Vec<Token>> {
+    pub fn get_token_by_id(&mut self, token_id: i32) -> BoxResult<Vec<Token>> {
         let get_token_by_id = "SELECT * FROM tokens WHERE id = $1;";
         debug!(self.logger, "Getting token by id";
             "id" => token_id, "query" => get_token_by_id);
