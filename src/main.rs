@@ -14,6 +14,7 @@ use crate::database::Database;
 mod utils;
 mod settings;
 mod database;
+mod errors;
 
 mod routes;
 #[cfg(test)]
