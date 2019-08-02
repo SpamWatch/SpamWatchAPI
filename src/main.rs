@@ -22,11 +22,10 @@ mod routes;
 mod tests;
 
 fn setup_database() -> BoxResult<i32> {
-    let logger = utils::logger();
     let mut db = match Database::new() {
         Ok(d) => d,
         Err(e) => {
-            error!(logger, "A Error occured while connecting to PostgreSQL"; "error" => e.to_string());
+            error!(utils::LOGGER, "A Error occured while connecting to PostgreSQL"; "error" => e.to_string());
             return Ok(1);
         }
     };
@@ -36,18 +35,17 @@ fn setup_database() -> BoxResult<i32> {
 }
 
 fn run() -> BoxResult<i32> {
-    let logger = utils::logger();
-    info!(logger, "Starting {}", env!("CARGO_PKG_NAME"); "version" => &env!("CARGO_PKG_VERSION"));
-    if config!(masterid) == 777000 {
-        warn!(logger, "MasterID not set. Defaulting to Telegrams id (777000). To avoid this set `masterid` under the `general` section in the config.")
+    info!(utils::LOGGER, "Starting {}", env!("CARGO_PKG_NAME"); "version" => &env!("CARGO_PKG_VERSION"));
+    if settings::ENV.masterid == 777000 {
+        warn!(utils::LOGGER, "MasterID not set. Defaulting to Telegrams id (777000). To avoid this set `masterid` under the `general` section in the config.")
     }
-    info!(logger, "Master ID is {}", config!(masterid));
+    info!(utils::LOGGER, "Master ID is {}", settings::ENV.masterid);
     let db_code = setup_database()?;
     if db_code > 0 {
         return Ok(db_code);
     }
-    let location = format!("{}:{}", config!(server.host), config!(server.port));
-    info!(logger, "Starting Server on {}", location);
+    let location = format!("{}:{}", settings::ENV.server.host, settings::ENV.server.port);
+    info!(utils::LOGGER, "Starting Server on {}", location);
     HttpServer::new(|| {
         App::new()
             .service(web::resource("/").route(

@@ -9,6 +9,7 @@ dependencies = [
  "config 0.9.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "dirs 2.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "lazy_static 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "nanoid 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "postgres 0.16.0-rc.2 (git+https://github.com/sfackler/rust-postgres)",
  "postgres-derive 0.3.3 (git+https://github.com/SitiSchu/rust-postgres-derive)",
