@@ -6,16 +6,8 @@ use crate::errors::UserError;
 use crate::utils;
 
 pub fn get_tokens() -> Result<HttpResponse, UserError> {
-    let mut db = Database::new()
-        .map_err(|e| {
-            error!(utils::LOGGER, "{}", e);
-            UserError::Internal
-        })?;
-    let tokens = db.get_tokens()
-                   .map_err(|e| {
-                       error!(utils::LOGGER, "{}", e);
-                       UserError::Internal
-                   })?;
+    let mut db = Database::new()?;
+    let tokens = db.get_tokens()?;
     let tokens_json = serde_json::to_value(tokens)
         .map_err(|e| {
             error!(utils::LOGGER, "{}", e);
@@ -26,19 +18,12 @@ pub fn get_tokens() -> Result<HttpResponse, UserError> {
 }
 
 pub fn get_token(req: HttpRequest) -> Result<HttpResponse, UserError> {
-    let mut db = Database::new()
-        .map_err(|e| {
-            error!(utils::LOGGER, "{}", e);
-            UserError::Internal
-        })?;
+    let mut db = Database::new()?;
     let token_id: i32 = req.match_info().get("id").unwrap().parse().map_err(|e| {
         error!(utils::LOGGER, "{}", e);
         UserError::BadRequest
     })?;
-    let token = db.get_token_by_id(token_id).map_err(|e| {
-        error!(utils::LOGGER, "{}", e);
-        UserError::Internal
-    })?;
+    let token = db.get_token_by_id(token_id)?;
     if !token.is_empty() {
         let tokens_json = serde_json::to_value(&token[0])
             .map_err(|e| {

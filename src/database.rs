@@ -4,7 +4,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::settings;
 use crate::utils;
-use crate::utils::BoxResult;
 
 #[derive(Debug, FromSql, ToSql, Serialize, Deserialize)]
 #[postgres(name = "permission")]
@@ -30,7 +29,7 @@ pub struct Token {
 }
 
 impl Database {
-    pub fn new() -> BoxResult<Database> {
+    pub fn new() -> Result<Database, postgres::Error> {
         debug!(utils::LOGGER, "Connecting to database";
          "host" => &settings::ENV.database.host,
          "port" => settings::ENV.database.port,
@@ -78,7 +77,7 @@ impl Database {
         Ok(())
     }
 
-    pub fn create_genesis_token(&mut self) -> BoxResult<()> {
+    pub fn create_genesis_token(&mut self) -> Result<(), postgres::Error> {
         let get_genesis_token = "SELECT * FROM tokens WHERE id = 1;";
         debug!(utils::LOGGER, "Checking if Genesis Token exists";
             "query" => get_genesis_token);
@@ -93,7 +92,7 @@ impl Database {
         Ok(())
     }
 
-    pub fn get_tokens(&mut self) -> BoxResult<Vec<Token>> {
+    pub fn get_tokens(&mut self) -> Result<Vec<Token>, postgres::Error> {
         let get_all_tokens = "SELECT * FROM tokens;";
         debug!(utils::LOGGER, "Getting all tokens"; "query" => get_all_tokens);
         let result: Vec<Row> = self.conn.query(get_all_tokens, &[])?;
@@ -107,7 +106,7 @@ impl Database {
                  .collect())
     }
 
-    pub fn get_token_by_id(&mut self, token_id: i32) -> BoxResult<Vec<Token>> {
+    pub fn get_token_by_id(&mut self, token_id: i32) -> Result<Vec<Token>, postgres::Error> {
         let get_token_by_id = "SELECT * FROM tokens WHERE id = $1;";
         debug!(utils::LOGGER, "Getting token by id";
             "id" => token_id, "query" => get_token_by_id);
@@ -123,7 +122,7 @@ impl Database {
                  .collect())
     }
 
-    pub fn create_token(&mut self, permission: Permission, userid: i32) -> BoxResult<String> {
+    pub fn create_token(&mut self, permission: Permission, userid: i32) -> Result<String, postgres::Error> {
         let token = nanoid::generate(settings::ENV.token_size as usize);
         let insert_token = "
             INSERT INTO tokens (
