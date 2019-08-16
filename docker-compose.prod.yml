@@ -7,10 +7,8 @@ secrets:
 services:
   postgres:
     image: postgres:11.4-alpine
-    # for production we can remove this exposed ports, as it helps in security
-    # while debugging for db in prod, should be done via a client container.
-    ports:
-      - '5432:5432'
+    # for production we don't need to expose ports
+      - '5432'
     secrets:
       - postgres_passwd
     environment:

@@ -21,6 +21,8 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
+    depends_on:
+      - postgres
     ports:
       - '6345:6345'
     volumes:

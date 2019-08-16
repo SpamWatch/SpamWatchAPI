@@ -13,5 +13,7 @@ COPY . /app/spamwatch-api
 # re-running our apps faster.
 RUN cargo build
 
+ENV RUST_BACKTRACE 1
+
 CMD ["cargo", "run"]
 
