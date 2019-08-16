@@ -1,11 +1,11 @@
-# Spam Watch API
+# SpamWatchAPI
 
-API server for Spam Watch Bot
+API server for SpamWatch
 
 ## Running via Docker
 
 Before running `docker-compose` please make sure you have added:
-* Postgres password in `/secrets/.postgre-passwd`
+* Postgres password in `/secrets/.postgres-passwd`
 * Created `config.toml` from `example.config.toml`.
 
 ```

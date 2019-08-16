@@ -23,6 +23,4 @@ services:
       dockerfile: Dockerfile
     ports:
       - '6345:6345'
-    volumes:
-      - ${PWD}:/app/spamwatch-api
 
