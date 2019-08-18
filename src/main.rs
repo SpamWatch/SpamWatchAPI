@@ -7,8 +7,6 @@ use std::process::exit;
 
 use actix_web::{App, guard, HttpResponse, HttpServer, web};
 
-use utils::BoxResult;
-
 use crate::database::Database;
 
 #[macro_use]
@@ -21,7 +19,7 @@ mod routes;
 #[cfg(test)]
 mod tests;
 
-fn setup_database() -> BoxResult<i32> {
+fn setup_database() -> Result<i32, postgres::Error> {
     let mut db = match Database::new() {
         Ok(d) => d,
         Err(e) => {
@@ -34,7 +32,7 @@ fn setup_database() -> BoxResult<i32> {
     Ok(0)
 }
 
-fn run() -> BoxResult<i32> {
+fn run() -> Result<i32, postgres::Error> {
     info!(utils::LOGGER, "Starting {}", env!("CARGO_PKG_NAME"); "version" => &env!("CARGO_PKG_VERSION"));
     if settings::ENV.masterid == 777000 {
         warn!(utils::LOGGER, "MasterID not set. Defaulting to Telegrams id (777000). To avoid this set `masterid` under the `general` section in the config.")
@@ -74,7 +72,7 @@ fn run() -> BoxResult<i32> {
     Ok(0)
 }
 
-fn main() -> BoxResult<()> {
+fn main() -> Result<(), postgres::Error> {
     let exit_code = run()?;
     exit(exit_code);
 }

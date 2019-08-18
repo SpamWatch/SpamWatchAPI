@@ -5,12 +5,22 @@ use actix_web::http::StatusCode;
 use actix_web::HttpResponse;
 use failure::Fail;
 use serde_json::json;
+use postgres;
+
+use crate::utils;
 
 #[derive(Fail, Debug)]
 pub enum UserError {
     Internal,
     NotFound,
     BadRequest
+}
+
+impl From<postgres::Error> for UserError {
+    fn from(item: postgres::Error) -> Self {
+        error!(utils::LOGGER, "{}", item);
+        UserError::Internal
+    }
 }
 
 impl fmt::Display for UserError {
