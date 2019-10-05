@@ -19,6 +19,13 @@ pub struct Token {
     pub userid: i32,
 }
 
+#[derive(Debug, Serialize)]
+pub struct Ban {
+    pub id: i32,
+    pub reason: String,
+    pub date: chrono::NaiveDateTime,
+}
+
 impl Token {
     pub fn json(&self) -> Result<Value, UserError> {
         Ok(serde_json::to_value(&self)?)
@@ -45,7 +52,11 @@ impl Database {
     }
 
     pub fn setup_tables(&mut self) -> Result<(), postgres::Error> {
-        let create_banlist = "CREATE TABLE IF NOT EXISTS banlist (id integer NOT NULL PRIMARY KEY, reason Text NOT NULL, date timestamp NOT NULL);";
+        let create_banlist = "
+            CREATE TABLE IF NOT EXISTS banlist (
+                id integer NOT NULL PRIMARY KEY,
+                reason Text NOT NULL,
+                date timestamp NOT NULL);";
         debug!(utils::LOGGER, "Creating Table if it doesn't exist";
             "query" => create_banlist, "name" => "banlist");
         self.conn.simple_query(create_banlist)?;
@@ -74,6 +85,7 @@ impl Database {
         Ok(())
     }
 
+    //region Tokens
     pub fn create_genesis_token(&mut self) -> Result<(), postgres::Error> {
         let get_genesis_token = "SELECT * FROM tokens WHERE id = 1;";
         debug!(utils::LOGGER, "Checking if Genesis Token exists";
@@ -158,5 +170,58 @@ impl Database {
         self.conn.query(delete_token_by_id, &[&token_id])?;
         Ok(())
     }
+    //endregion
+
+    //region Banlist
+    pub fn get_bans(&mut self) -> Result<Vec<Ban>, postgres::Error> {
+        let get_all_bans = "SELECT * FROM banlist;";
+        debug!(utils::LOGGER, "Getting all bans"; "query" => get_all_bans);
+        let result: Vec<Row> = self.conn.query(get_all_bans, &[])?;
+        Ok(result.into_iter()
+                 .map(|row| Ban {
+                     id: row.get(0),
+                     reason: row.get(1),
+                     date: row.get(2),
+                 })
+                 .collect())
+    }
+
+    pub fn add_ban(&mut self, user_id: i32, reason: &String) -> Result<(), postgres::Error> {
+        let upsert_ban = "
+            INSERT INTO banlist
+            VALUES ($1, $2, now())
+            ON CONFLICT (id) DO
+            UPDATE SET reason=EXCLUDED.reason, date=excluded.date;";
+        debug!(utils::LOGGER, "Upserting ban";
+            "id" => &user_id, "reason" => &reason, "query" => upsert_ban);
+        self.conn.query(upsert_ban, &[&user_id, &reason])?;
+        Ok(())
+    }
+
+    pub fn get_ban(&mut self, user_id: i32) -> Result<Option<Ban>, postgres::Error> {
+        let get_ban = "SELECT * FROM banlist WHERE id = $1;";
+        debug!(utils::LOGGER, "Getting token by id";
+            "id" => user_id, "query" => get_ban);
+        let row: Option<Row> = self.conn.query(get_ban, &[&user_id])?.pop();
+
+        Ok(match row {
+            Some(ban) => Some(Ban {
+                id: ban.get(0),
+                reason: ban.get(1),
+                date: ban.get(2),
+            }),
+            None => None
+        })
+    }
+
+    pub fn delete_ban(&mut self, user_id: i32) -> Result<(), postgres::Error> {
+        let delete_ban = "DELETE FROM banlist WHERE id = $1;";
+        debug!(utils::LOGGER, "Deleting ban";
+            "id" => user_id, "query" => delete_ban);
+        let row: Option<Row> = self.conn.query(delete_ban, &[&user_id])?.pop();
+
+        Ok(())
+    }
+    //endregion
 }
 

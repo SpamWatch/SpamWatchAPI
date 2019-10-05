@@ -48,10 +48,11 @@ pub fn post_tokens(req: HttpRequest, data: web::Json<CreateToken>) -> Result<Htt
 
 
 pub fn get_token(req: HttpRequest) -> Result<HttpResponse, UserError> {
-    let mut db = Database::new()?;
     let guard = PermissionGuard::new(utils::get_auth_token(&req)?)?;
 
     if guard.root() {
+        let mut db = Database::new()?;
+
         let token_id: i32 = req.match_info().get("id").unwrap().parse().map_err(|e| {
             error!(utils::LOGGER, "{}", e);
             UserError::BadRequest
@@ -66,10 +67,10 @@ pub fn get_token(req: HttpRequest) -> Result<HttpResponse, UserError> {
 }
 
 pub fn delete_token(req: HttpRequest) -> Result<HttpResponse, UserError> {
-    let mut db = Database::new()?;
     let guard = PermissionGuard::new(utils::get_auth_token(&req)?)?;
 
     if guard.root() {
+        let mut db = Database::new()?;
         let token_id: i32 = req.match_info().get("id").unwrap().parse().map_err(|e| {
             error!(utils::LOGGER, "{}", e);
             UserError::BadRequest
