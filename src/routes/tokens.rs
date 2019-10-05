@@ -50,19 +50,26 @@ pub fn post_tokens(req: HttpRequest, data: web::Json<CreateToken>) -> Result<Htt
 pub fn get_token(req: HttpRequest) -> Result<HttpResponse, UserError> {
     let guard = PermissionGuard::new(utils::get_auth_token(&req)?)?;
 
-    if guard.root() {
-        let mut db = Database::new()?;
-
-        let token_id: i32 = req.match_info().get("id").unwrap().parse().map_err(|e| {
-            error!(utils::LOGGER, "{}", e);
-            UserError::BadRequest
-        })?;
-        match db.get_token_by_id(token_id)? {
+    let mut db = Database::new()?;
+    let _id = req.match_info().get("id").unwrap();
+    if _id == "self" {
+        match db.get_token(utils::get_auth_token(&req)?)? {
             Some(token) => Ok(HttpResponse::Ok().json(token.json()?)),
             None => Err(UserError::NotFound)
         }
     } else {
-        Err(UserError::Unauthorized)
+        if guard.root() {
+            let token_id: i32 = _id.parse().map_err(|e| {
+                error!(utils::LOGGER, "{}", e);
+                UserError::BadRequest
+            })?;
+            match db.get_token_by_id(token_id)? {
+                Some(token) => Ok(HttpResponse::Ok().json(token.json()?)),
+                None => Err(UserError::NotFound)
+            }
+        } else {
+            Err(UserError::Unauthorized)
+        }
     }
 }
 
