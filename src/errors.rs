@@ -26,6 +26,14 @@ impl From<postgres::Error> for UserError {
     }
 }
 
+impl From<serde_json::error::Error> for UserError {
+    fn from(item: serde_json::error::Error) -> Self {
+        error!(utils::LOGGER, "{}", item);
+        UserError::Internal
+    }
+}
+
+
 impl fmt::Display for UserError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Display: {}", self.to_json())

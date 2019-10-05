@@ -5,16 +5,17 @@ extern crate slog;
 
 use std::process::exit;
 
-use actix_web::{App, guard, HttpResponse, HttpServer, web};
+use actix_web::{App, guard, HttpServer, web};
 
 use crate::database::Database;
+use crate::errors::UserError;
 
 #[macro_use]
 mod utils;
 mod settings;
 mod database;
 mod errors;
-
+mod guards;
 mod routes;
 #[cfg(test)]
 mod tests;
@@ -29,6 +30,9 @@ fn setup_database() -> Result<i32, postgres::Error> {
     };
     db.setup_tables()?;
     db.create_genesis_token()?;
+//    for i in 1..10 {
+//        db.create_token(&Permission::User, i);
+//    }
     Ok(0)
 }
 
@@ -46,26 +50,23 @@ fn run() -> Result<i32, postgres::Error> {
     info!(utils::LOGGER, "Starting Server on {}", location);
     HttpServer::new(|| {
         App::new()
-            .service(web::resource("/").route(
+            .default_service(
                 web::route()
-                    .guard(guard::Any(guard::Get()).or(guard::Head()))
-                    .to(|| HttpResponse::MethodNotAllowed())
-                    .to(routes::root::info)))
-            .service(web::resource("/version").route(
-                web::route()
-                    .guard(guard::Get())
-                    .to(|| HttpResponse::MethodNotAllowed())
-                    .to(routes::root::version)))
-            .service(web::resource("/tokens").route(
-                web::route()
-                    .guard(guard::Get())
-                    .to(|| HttpResponse::MethodNotAllowed())
-                    .to(routes::tokens::get_tokens)))
-            .service(web::resource("/tokens/{id}").route(
-                web::route()
-                    .guard(guard::Get())
-                    .to(|| HttpResponse::MethodNotAllowed())
-                    .to(routes::tokens::get_token)))
+                    .to(|| UserError::NotFound.to_response()),
+            )
+            .service(web::resource("/")
+                .route(web::get().to(routes::root::info))
+                .route(web::head().to(routes::root::info)))
+            .service(web::resource("/version")
+                .route(web::get().to(routes::root::version)))
+
+            .service(web::resource("/tokens")
+                .route(web::get().to(routes::tokens::get_tokens))
+                .route(web::post().to(routes::tokens::post_tokens)))
+            .service(web::resource("/tokens/{id}")
+                .route(web::get().to(routes::tokens::get_token))
+                .route(web::delete().to(routes::tokens::delete_token))
+            )
     })
         .bind(location).unwrap()
         .run().unwrap();

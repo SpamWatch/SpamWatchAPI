@@ -1,9 +1,10 @@
 use std::path::PathBuf;
-use serde::{Serialize, Deserialize};
-use lazy_static::lazy_static;
 
 use config::{Config, ConfigError, Environment, File};
 use dirs::home_dir;
+use serde::{Deserialize, Serialize};
+
+use lazy_static::lazy_static;
 
 use crate::utils;
 
@@ -51,14 +52,14 @@ impl Default for Settings {
                 port: 5432,
                 name: "SpamWatchAPI".to_string(),
                 username: "SpamWatchAPI".to_string(),
-                password: String::default()
+                password: String::default(),
             },
             server: ServerCfg {
                 host: "127.0.0.1".to_string(),
                 port: 6345,
             },
             masterid: 777000,
-            token_size: 64
+            token_size: 64,
         }
     }
 }
@@ -79,9 +80,9 @@ impl Settings {
         settings.merge(
             File::with_name(&format!("/etc/{}/config", &env!("CARGO_PKG_NAME"))).required(false)
         )?
-        .merge(File::with_name(home_config.to_str().unwrap()).required(false))?
-        .merge(File::with_name("config").required(false))?
-        .merge(Environment::with_prefix("APP"))?;
+            .merge(File::with_name(home_config.to_str().unwrap()).required(false))?
+            .merge(File::with_name("config").required(false))?
+            .merge(Environment::with_prefix("APP"))?;
 
         Ok(settings.try_into().unwrap())
     }

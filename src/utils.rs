@@ -1,8 +1,11 @@
+use actix_web::HttpRequest;
 use slog::{Drain, Logger};
 use slog_async;
 use slog_term;
 
 use lazy_static::lazy_static;
+
+use crate::errors::UserError;
 
 fn logger() -> Logger {
     let decorator = slog_term::TermDecorator::new().force_color().build();
@@ -15,3 +18,16 @@ fn logger() -> Logger {
 lazy_static! {
     pub static ref LOGGER: Logger = logger();
 }
+
+pub fn get_auth_token(req: &HttpRequest) -> Result<String, UserError> {
+    let token_header = match req.headers().get("authorization") {
+        Some(v) => v.to_str().map_err(|e| {
+            error!(LOGGER, "{}", e);
+            UserError::BadRequest
+        })?,
+        None => { return Err(UserError::Unauthorized); }
+    };
+    let _token: Vec<&str> = token_header.split_ascii_whitespace().collect();
+    Ok(_token[1].to_string())
+}
+

@@ -1,20 +1,11 @@
 use postgres::{Client, Config, NoTls, Row};
-use postgres_derive::{FromSql, ToSql};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
+use serde_json::Value;
 
+use crate::errors::UserError;
+use crate::guards::Permission;
 use crate::settings;
 use crate::utils;
-
-#[derive(Debug, FromSql, ToSql, Serialize, Deserialize)]
-#[postgres(name = "permission")]
-pub enum Permission {
-    // Can read from the API
-    User,
-    // Can add IDs to the API
-    Admin,
-    // Can create/revoke tokens
-    Root,
-}
 
 pub struct Database {
     conn: Client,
@@ -22,10 +13,16 @@ pub struct Database {
 
 #[derive(Debug, Serialize)]
 pub struct Token {
-    id: i32,
-    token: String,
-    permissions: Permission,
-    userid: i32,
+    pub id: i32,
+    pub token: String,
+    pub permissions: Permission,
+    pub userid: i32,
+}
+
+impl Token {
+    pub fn json(&self) -> Result<Value, UserError> {
+        Ok(serde_json::to_value(&self)?)
+    }
 }
 
 impl Database {
@@ -84,7 +81,7 @@ impl Database {
         if self.conn.query(get_genesis_token, &[])?.is_empty() {
             info!(utils::LOGGER, "Genesis Token doesn't exist. Creating one";
                 "size" => settings::ENV.token_size);
-            let token = self.create_token(Permission::Root, settings::ENV.masterid)?;
+            let token = self.create_token(&Permission::Root, settings::ENV.masterid)?;
             info!(utils::LOGGER, "Created Genesis Token `{}`. Write this down, this will be the only time you see it.", token)
         } else {
             debug!(utils::LOGGER, "Genesis Token exists. Skipping creation.")
@@ -106,23 +103,41 @@ impl Database {
                  .collect())
     }
 
-    pub fn get_token_by_id(&mut self, token_id: i32) -> Result<Vec<Token>, postgres::Error> {
+    pub fn get_token_by_id(&mut self, token_id: i32) -> Result<Option<Token>, postgres::Error> {
         let get_token_by_id = "SELECT * FROM tokens WHERE id = $1;";
         debug!(utils::LOGGER, "Getting token by id";
             "id" => token_id, "query" => get_token_by_id);
-        let result: Vec<Row> = self.conn.query(get_token_by_id, &[&token_id])?;
-        // Since there shouldn't be more than one token for a ID taking the first index should be fine.
-        Ok(result.into_iter()
-                 .map(|row| Token {
-                     id: row.get(0),
-                     token: row.get(1),
-                     permissions: row.get(2),
-                     userid: row.get(3),
-                 })
-                 .collect())
+        let row: Option<Row> = self.conn.query(get_token_by_id, &[&token_id])?.pop();
+
+        Ok(match row {
+            Some(token) => Some(Token {
+                id: token.get(0),
+                token: token.get(1),
+                permissions: token.get(2),
+                userid: token.get(3),
+            }),
+            None => None
+        })
     }
 
-    pub fn create_token(&mut self, permission: Permission, userid: i32) -> Result<String, postgres::Error> {
+
+    pub fn get_token(&mut self, token: String) -> Result<Option<Token>, postgres::Error> {
+        let get_token_by_id = "SELECT * FROM tokens WHERE token = $1;";
+        debug!(utils::LOGGER, "Getting token"; "query" => get_token_by_id);
+        let row: Option<Row> = self.conn.query(get_token_by_id, &[&token])?.pop();
+
+        Ok(match row {
+            Some(token) => Some(Token {
+                id: token.get(0),
+                token: token.get(1),
+                permissions: token.get(2),
+                userid: token.get(3),
+            }),
+            None => None
+        })
+    }
+
+    pub fn create_token(&mut self, permission: &Permission, userid: i32) -> Result<String, postgres::Error> {
         let token = nanoid::generate(settings::ENV.token_size as usize);
         let insert_token = "
             INSERT INTO tokens (
@@ -135,4 +150,13 @@ impl Database {
         self.conn.execute(insert_token, &[&token, &permission, &userid])?;
         Ok(token)
     }
+
+    pub fn delete_token_by_id(&mut self, token_id: i32) -> Result<(), postgres::Error> {
+        let delete_token_by_id = "DELETE FROM tokens WHERE id = $1;";
+        debug!(utils::LOGGER, "Deleting token by id";
+            "id" => token_id, "query" => delete_token_by_id);
+        self.conn.query(delete_token_by_id, &[&token_id])?;
+        Ok(())
+    }
 }
+
