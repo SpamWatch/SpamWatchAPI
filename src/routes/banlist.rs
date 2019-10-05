@@ -1,8 +1,8 @@
 use actix_web::{HttpRequest, HttpResponse, Result, web};
 use serde::Deserialize;
-use serde_json::Value;
+use serde_json::{json, Value};
 
-use crate::database::{Database, Token};
+use crate::database::{Ban, Database, Token};
 use crate::errors::UserError;
 use crate::guards::{Permission, PermissionGuard};
 use crate::guards::Permission::User;
@@ -19,7 +19,14 @@ pub fn get_bans(req: HttpRequest) -> Result<HttpResponse, UserError> {
     if guard.admin() {
         let mut db = Database::new()?;
         let bans = db.get_bans()?;
-        let bans_json = serde_json::to_value(bans)
+        let mut nicer_bans: Vec<Value> = bans
+            .iter()
+            .map(|ban| json!({
+                "id": ban.id,
+                "reason": ban.reason,
+                "date": ban.date.timestamp()
+            })).collect();
+        let bans_json = serde_json::to_value(nicer_bans)
             .map_err(|e| {
                 error!(utils::LOGGER, "{}", e);
                 UserError::Internal
@@ -53,7 +60,11 @@ pub fn get_ban(req: HttpRequest) -> Result<HttpResponse, UserError> {
     })?;
     let mut db = Database::new()?;
     match db.get_ban(user_id)? {
-        Some(ban) => Ok(HttpResponse::Ok().json(serde_json::to_value(ban)?)),
+        Some(ban) => Ok(HttpResponse::Ok().json(serde_json::to_value(json!({
+                "id": ban.id,
+                "reason": ban.reason,
+                "date": ban.date.timestamp()
+            }))?)),
         None => Err(UserError::NotFound)
     }
 }
