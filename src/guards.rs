@@ -39,7 +39,7 @@ impl PermissionGuard {
     }
 
     pub fn admin(&self) -> bool {
-        match self.token.permissions {
+        match self.token.permission {
             Permission::Admin => true,
             Permission::Root => true,
             _ => false
@@ -47,7 +47,7 @@ impl PermissionGuard {
     }
 
     pub fn root(&self) -> bool {
-        match self.token.permissions {
+        match self.token.permission {
             Permission::Root => true,
             _ => false
         }

@@ -15,7 +15,7 @@ pub struct Database {
 pub struct Token {
     pub id: i32,
     pub token: String,
-    pub permissions: Permission,
+    pub permission: Permission,
     pub userid: i32,
 }
 
@@ -61,7 +61,7 @@ impl Database {
             "query" => create_banlist, "name" => "banlist");
         self.conn.simple_query(create_banlist)?;
 
-        let permissions_enum = "
+        let permission_enum = "
             DO $$
             BEGIN
                 IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'permission') THEN
@@ -69,14 +69,14 @@ impl Database {
                 END IF;
             END$$;";
         debug!(utils::LOGGER, "Creating type `permission` if it doesn't exist";
-            "query" => permissions_enum, "name" => "banlist");
-        self.conn.simple_query(permissions_enum)?;
+            "query" => permission_enum, "name" => "banlist");
+        self.conn.simple_query(permission_enum)?;
 
         let create_tokens = "
             CREATE TABLE IF NOT EXISTS tokens (
                 id SERIAL,
                 token Text NOT NULL PRIMARY KEY,
-                permissions permission NOT NULL,
+                permission permission NOT NULL,
                 userid integer NOT NULL);";
 
         debug!(utils::LOGGER, "Creating Table if it doesn't exist";
@@ -109,7 +109,7 @@ impl Database {
                  .map(|row| Token {
                      id: row.get(0),
                      token: row.get(1),
-                     permissions: row.get(2),
+                     permission: row.get(2),
                      userid: row.get(3),
                  })
                  .collect())
@@ -125,7 +125,7 @@ impl Database {
             Some(token) => Some(Token {
                 id: token.get(0),
                 token: token.get(1),
-                permissions: token.get(2),
+                permission: token.get(2),
                 userid: token.get(3),
             }),
             None => None
@@ -142,7 +142,7 @@ impl Database {
             Some(token) => Some(Token {
                 id: token.get(0),
                 token: token.get(1),
-                permissions: token.get(2),
+                permission: token.get(2),
                 userid: token.get(3),
             }),
             None => None
@@ -154,7 +154,7 @@ impl Database {
         let insert_token = "
             INSERT INTO tokens (
                 token,
-                permissions,
+                permission,
                 userid)
             VALUES ($1, $2, $3);";
         debug!(utils::LOGGER, "Creating Token";
