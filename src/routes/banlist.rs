@@ -32,15 +32,14 @@ pub fn get_bans(req: HttpRequest) -> Result<HttpResponse, UserError> {
 }
 
 
-pub fn post_bans(req: HttpRequest, data: web::Json<CreateBan>) -> Result<HttpResponse, UserError> {
+pub fn post_bans(req: HttpRequest, data: web::Json<Vec<CreateBan>>) -> Result<HttpResponse, UserError> {
     let guard = PermissionGuard::new(utils::get_auth_token(&req)?)?;
     if guard.admin() {
         let mut db = Database::new()?;
-        db.add_ban(data.id, &data.reason)?;
-        match db.get_ban(data.id)? {
-            Some(ban) => Ok(HttpResponse::Ok().json(serde_json::to_value(ban)?)),
-            None => Err(UserError::NotFound)
+        for ban in data.iter() {
+            db.add_ban(ban.id, &ban.reason)?;
         }
+        Ok(HttpResponse::NoContent().body(""))
     } else {
         Err(UserError::Forbidden)
     }
