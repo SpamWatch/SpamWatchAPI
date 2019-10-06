@@ -92,8 +92,8 @@ impl Database {
             "query" => get_genesis_token);
         if self.conn.query(get_genesis_token, &[])?.is_empty() {
             info!(utils::LOGGER, "Genesis Token doesn't exist. Creating one";
-                "size" => settings::ENV.token_size);
-            let token = self.create_token(&Permission::Root, settings::ENV.masterid)?;
+                "size" => settings::ENV.general.token_size);
+            let token = self.create_token(&Permission::Root, settings::ENV.general.masterid)?;
             info!(utils::LOGGER, "Created Genesis Token `{}`. Write this down, this will be the only time you see it.", token)
         } else {
             debug!(utils::LOGGER, "Genesis Token exists. Skipping creation.")
@@ -150,7 +150,7 @@ impl Database {
     }
 
     pub fn create_token(&mut self, permission: &Permission, userid: i32) -> Result<String, postgres::Error> {
-        let token = nanoid::generate(settings::ENV.token_size as usize);
+        let token = nanoid::generate(settings::ENV.general.token_size as usize);
         let insert_token = "
             INSERT INTO tokens (
                 token,

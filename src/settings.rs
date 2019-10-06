@@ -22,6 +22,12 @@ lazy_static! {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct General {
+    pub masterid: i32,
+    pub token_size: u8,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct DatabaseCfg {
     pub host: String,
     pub port: u16,
@@ -40,8 +46,7 @@ pub struct ServerCfg {
 pub struct Settings {
     pub database: DatabaseCfg,
     pub server: ServerCfg,
-    pub masterid: i32,
-    pub token_size: u8,
+    pub general: General,
 }
 
 impl Default for Settings {
@@ -58,8 +63,10 @@ impl Default for Settings {
                 host: "127.0.0.1".to_string(),
                 port: 6345,
             },
-            masterid: 777000,
-            token_size: 64,
+            general: General {
+                masterid: 777000,
+                token_size: 64,
+            },
         }
     }
 }

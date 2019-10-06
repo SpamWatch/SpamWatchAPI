@@ -38,10 +38,10 @@ fn setup_database() -> Result<i32, postgres::Error> {
 
 fn run() -> Result<i32, postgres::Error> {
     info!(utils::LOGGER, "Starting {}", env!("CARGO_PKG_NAME"); "version" => &env!("CARGO_PKG_VERSION"));
-    if settings::ENV.masterid == 777000 {
+    if settings::ENV.general.masterid == 777000 {
         warn!(utils::LOGGER, "MasterID not set. Defaulting to Telegrams id (777000). To avoid this set `masterid` under the `general` section in the config.")
     }
-    info!(utils::LOGGER, "Master ID is {}", settings::ENV.masterid);
+    info!(utils::LOGGER, "Master ID is {}", settings::ENV.general.masterid);
     let db_code = setup_database()?;
     if db_code > 0 {
         return Ok(db_code);

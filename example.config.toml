@@ -1,3 +1,4 @@
+[general]
 # All fields are required for now
 token_size = 64
 # Telegram ID of the master account
