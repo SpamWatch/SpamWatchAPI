@@ -9,12 +9,16 @@ mod get {
 
     #[test]
     fn test_tokens_no_auth() {
-        let mut app = test::init_service(App::new()
-            .service(web::resource("/tokens").route(
-                web::route()
-                    .guard(guard::Get())
-                    .to(|| HttpResponse::MethodNotAllowed())
-                    .to(routes::tokens::get_tokens))));
+        let mut app = test::init_service(
+            App::new().service(
+                web::resource("/tokens").route(
+                    web::route()
+                        .guard(guard::Get())
+                        .to(|| HttpResponse::MethodNotAllowed())
+                        .to(routes::tokens::get_tokens),
+                ),
+            ),
+        );
         // Create request object
         let req = test::TestRequest::get().uri("/tokens").to_request();
 
@@ -23,15 +27,18 @@ mod get {
         assert_eq!(resp.status(), StatusCode::FORBIDDEN);
     }
 
-
     #[test]
     fn test_token_no_auth() {
-        let mut app = test::init_service(App::new()
-            .service(web::resource("/tokens/{id}").route(
-                web::route()
-                    .guard(guard::Get())
-                    .to(|| HttpResponse::MethodNotAllowed())
-                    .to(routes::tokens::get_tokens))));
+        let mut app = test::init_service(
+            App::new().service(
+                web::resource("/tokens/{id}").route(
+                    web::route()
+                        .guard(guard::Get())
+                        .to(|| HttpResponse::MethodNotAllowed())
+                        .to(routes::tokens::get_tokens),
+                ),
+            ),
+        );
         // Create request object
         let req = test::TestRequest::get().uri("/tokens/1").to_request();
 
@@ -52,12 +59,16 @@ mod post {
 
     #[test]
     fn test_version() {
-        let mut app = test::init_service(App::new()
-            .service(web::resource("/tokens").route(
-                web::route()
-                    .guard(guard::Post())
-                    .to(|| HttpResponse::MethodNotAllowed())
-                    .to(routes::root::version))));
+        let mut app = test::init_service(
+            App::new().service(
+                web::resource("/tokens").route(
+                    web::route()
+                        .guard(guard::Post())
+                        .to(|| HttpResponse::MethodNotAllowed())
+                        .to(routes::root::version),
+                ),
+            ),
+        );
         // Create request object
         let req = test::TestRequest::post().uri("/tokens").to_request();
 
@@ -78,12 +89,16 @@ mod put {
 
     #[test]
     fn test_version() {
-        let mut app = test::init_service(App::new()
-            .service(web::resource("/version").route(
-                web::route()
-                    .guard(guard::Get())
-                    .to(|| HttpResponse::MethodNotAllowed())
-                    .to(routes::root::version))));
+        let mut app = test::init_service(
+            App::new().service(
+                web::resource("/version").route(
+                    web::route()
+                        .guard(guard::Get())
+                        .to(|| HttpResponse::MethodNotAllowed())
+                        .to(routes::root::version),
+                ),
+            ),
+        );
         // Create request object
         let req = test::TestRequest::put().uri("/version").to_request();
 
@@ -104,12 +119,16 @@ mod patch {
 
     #[test]
     fn test_version() {
-        let mut app = test::init_service(App::new()
-            .service(web::resource("/version").route(
-                web::route()
-                    .guard(guard::Get())
-                    .to(|| HttpResponse::MethodNotAllowed())
-                    .to(routes::root::version))));
+        let mut app = test::init_service(
+            App::new().service(
+                web::resource("/version").route(
+                    web::route()
+                        .guard(guard::Get())
+                        .to(|| HttpResponse::MethodNotAllowed())
+                        .to(routes::root::version),
+                ),
+            ),
+        );
         // Create request object
         let req = test::TestRequest::patch().uri("/version").to_request();
 
@@ -130,12 +149,16 @@ mod delete {
 
     #[test]
     fn test_version() {
-        let mut app = test::init_service(App::new()
-            .service(web::resource("/version").route(
-                web::route()
-                    .guard(guard::Get())
-                    .to(|| HttpResponse::MethodNotAllowed())
-                    .to(routes::root::version))));
+        let mut app = test::init_service(
+            App::new().service(
+                web::resource("/version").route(
+                    web::route()
+                        .guard(guard::Get())
+                        .to(|| HttpResponse::MethodNotAllowed())
+                        .to(routes::root::version),
+                ),
+            ),
+        );
         // Create request object
         let req = test::TestRequest::delete().uri("/version").to_request();
 

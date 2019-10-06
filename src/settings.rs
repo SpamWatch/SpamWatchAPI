@@ -13,7 +13,7 @@ lazy_static! {
         Ok(settings) => {
             debug!(utils::LOGGER, "Settings:"; "name" => &settings.database.name);
             settings
-        },
+        }
         Err(err) => {
             error!(utils::LOGGER, "{}", &format!("{}", err));
             Settings::default()
@@ -74,7 +74,12 @@ impl Default for Settings {
 impl Settings {
     pub fn load() -> Result<Self, ConfigError> {
         let home_config: PathBuf = match home_dir() {
-            Some(path) => [path, PathBuf::from(&format!(".config/{}/config", &env!("CARGO_PKG_NAME")))].iter().collect(),
+            Some(path) => [
+                path,
+                PathBuf::from(&format!(".config/{}/config", &env!("CARGO_PKG_NAME"))),
+            ]
+                .iter()
+                .collect(),
             None => {
                 debug!(utils::LOGGER, "Can't get home directory");
                 PathBuf::from("config")
@@ -84,9 +89,11 @@ impl Settings {
         let defaults = Config::try_from(&Settings::default())?;
         let mut settings = Config::default();
         settings.merge(defaults)?;
-        settings.merge(
-            File::with_name(&format!("/etc/{}/config", &env!("CARGO_PKG_NAME"))).required(false)
-        )?
+        settings
+            .merge(
+                File::with_name(&format!("/etc/{}/config", &env!("CARGO_PKG_NAME")))
+                    .required(false),
+            )?
             .merge(File::with_name(home_config.to_str().unwrap()).required(false))?
             .merge(File::with_name("config").required(false))?
             .merge(Environment::with_prefix("APP"))?;

@@ -105,14 +105,15 @@ impl Database {
         let get_all_tokens = "SELECT * FROM tokens;";
         debug!(utils::LOGGER, "Getting all tokens"; "query" => get_all_tokens);
         let result: Vec<Row> = self.conn.query(get_all_tokens, &[])?;
-        Ok(result.into_iter()
-                 .map(|row| Token {
-                     id: row.get(0),
-                     token: row.get(1),
-                     permission: row.get(2),
-                     userid: row.get(3),
-                 })
-                 .collect())
+        Ok(result
+            .into_iter()
+            .map(|row| Token {
+                id: row.get(0),
+                token: row.get(1),
+                permission: row.get(2),
+                userid: row.get(3),
+            })
+            .collect())
     }
 
     pub fn get_token_by_id(&mut self, token_id: i32) -> Result<Option<Token>, postgres::Error> {
@@ -128,10 +129,9 @@ impl Database {
                 permission: token.get(2),
                 userid: token.get(3),
             }),
-            None => None
+            None => None,
         })
     }
-
 
     pub fn get_token(&mut self, token: String) -> Result<Option<Token>, postgres::Error> {
         let get_token_by_id = "SELECT * FROM tokens WHERE token = $1;";
@@ -145,11 +145,15 @@ impl Database {
                 permission: token.get(2),
                 userid: token.get(3),
             }),
-            None => None
+            None => None,
         })
     }
 
-    pub fn create_token(&mut self, permission: &Permission, userid: i32) -> Result<String, postgres::Error> {
+    pub fn create_token(
+        &mut self,
+        permission: &Permission,
+        userid: i32,
+    ) -> Result<String, postgres::Error> {
         let token = nanoid::generate(settings::ENV.general.token_size as usize);
         let insert_token = "
             INSERT INTO tokens (
@@ -177,13 +181,14 @@ impl Database {
         let get_all_bans = "SELECT * FROM banlist;";
         debug!(utils::LOGGER, "Getting all bans"; "query" => get_all_bans);
         let result: Vec<Row> = self.conn.query(get_all_bans, &[])?;
-        Ok(result.into_iter()
-                 .map(|row| Ban {
-                     id: row.get(0),
-                     reason: row.get(1),
-                     date: row.get(2),
-                 })
-                 .collect())
+        Ok(result
+            .into_iter()
+            .map(|row| Ban {
+                id: row.get(0),
+                reason: row.get(1),
+                date: row.get(2),
+            })
+            .collect())
     }
 
     pub fn add_ban(&mut self, user_id: i32, reason: &String) -> Result<(), postgres::Error> {
@@ -210,7 +215,7 @@ impl Database {
                 reason: ban.get(1),
                 date: ban.get(2),
             }),
-            None => None
+            None => None,
         })
     }
 
@@ -224,4 +229,3 @@ impl Database {
     }
     //endregion
 }
-

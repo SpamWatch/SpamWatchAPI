@@ -25,9 +25,10 @@ pub fn get_auth_token(req: &HttpRequest) -> Result<String, UserError> {
             error!(LOGGER, "{}", e);
             UserError::BadRequest
         })?,
-        None => { return Err(UserError::Unauthorized); }
+        None => {
+            return Err(UserError::Unauthorized);
+        }
     };
     let _token: Vec<&str> = token_header.split_ascii_whitespace().collect();
     Ok(_token[1].to_string())
 }
-

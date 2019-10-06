@@ -33,7 +33,6 @@ impl From<serde_json::error::Error> for UserError {
     }
 }
 
-
 impl fmt::Display for UserError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Display: {}", self.to_json())
@@ -53,71 +52,41 @@ impl error::ResponseError for UserError {
 impl UserError {
     fn to_json(&self) -> Value {
         match *self {
-            UserError::Internal => {
-                json!({
-                        "code": StatusCode::INTERNAL_SERVER_ERROR.as_u16(),
-                        "error": StatusCode::INTERNAL_SERVER_ERROR.canonical_reason()
-                    })
-            }
-            UserError::NotFound => {
-                json!({
-                        "code": StatusCode::NOT_FOUND.as_u16(),
-                        "error": StatusCode::NOT_FOUND.canonical_reason()
-                    })
-            }
-            UserError::BadRequest => {
-                json!({
-                        "code": StatusCode::BAD_REQUEST.as_u16(),
-                        "error": StatusCode::BAD_REQUEST.canonical_reason()
-                    })
-            }
-            UserError::MethodNotAllowed => {
-                json!({
-                        "code": StatusCode::METHOD_NOT_ALLOWED.as_u16(),
-                        "error": StatusCode::METHOD_NOT_ALLOWED.canonical_reason()
-                    })
-            }
-            UserError::Unauthorized => {
-                json!({
-                        "code": StatusCode::UNAUTHORIZED.as_u16(),
-                        "error": StatusCode::UNAUTHORIZED.canonical_reason()
-                    })
-            }
-            UserError::Forbidden => {
-                json!({
-                        "code": StatusCode::FORBIDDEN.as_u16(),
-                        "error": StatusCode::FORBIDDEN.canonical_reason()
-                    })
-            }
+            UserError::Internal => json!({
+                "code": StatusCode::INTERNAL_SERVER_ERROR.as_u16(),
+                "error": StatusCode::INTERNAL_SERVER_ERROR.canonical_reason()
+            }),
+            UserError::NotFound => json!({
+                "code": StatusCode::NOT_FOUND.as_u16(),
+                "error": StatusCode::NOT_FOUND.canonical_reason()
+            }),
+            UserError::BadRequest => json!({
+                "code": StatusCode::BAD_REQUEST.as_u16(),
+                "error": StatusCode::BAD_REQUEST.canonical_reason()
+            }),
+            UserError::MethodNotAllowed => json!({
+                "code": StatusCode::METHOD_NOT_ALLOWED.as_u16(),
+                "error": StatusCode::METHOD_NOT_ALLOWED.canonical_reason()
+            }),
+            UserError::Unauthorized => json!({
+                "code": StatusCode::UNAUTHORIZED.as_u16(),
+                "error": StatusCode::UNAUTHORIZED.canonical_reason()
+            }),
+            UserError::Forbidden => json!({
+                "code": StatusCode::FORBIDDEN.as_u16(),
+                "error": StatusCode::FORBIDDEN.canonical_reason()
+            }),
         }
     }
 
     pub fn to_response(&self) -> HttpResponse {
         match *self {
-            UserError::Internal => {
-                HttpResponse::InternalServerError()
-                    .json(self.to_json())
-            }
-            UserError::NotFound => {
-                HttpResponse::NotFound()
-                    .json(self.to_json())
-            }
-            UserError::BadRequest => {
-                HttpResponse::BadRequest()
-                    .json(self.to_json())
-            }
-            UserError::MethodNotAllowed => {
-                HttpResponse::MethodNotAllowed()
-                    .json(self.to_json())
-            }
-            UserError::Unauthorized => {
-                HttpResponse::Unauthorized()
-                    .json(self.to_json())
-            }
-            UserError::Forbidden => {
-                HttpResponse::Forbidden()
-                    .json(self.to_json())
-            }
+            UserError::Internal => HttpResponse::InternalServerError().json(self.to_json()),
+            UserError::NotFound => HttpResponse::NotFound().json(self.to_json()),
+            UserError::BadRequest => HttpResponse::BadRequest().json(self.to_json()),
+            UserError::MethodNotAllowed => HttpResponse::MethodNotAllowed().json(self.to_json()),
+            UserError::Unauthorized => HttpResponse::Unauthorized().json(self.to_json()),
+            UserError::Forbidden => HttpResponse::Forbidden().json(self.to_json()),
         }
     }
 }

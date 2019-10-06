@@ -9,12 +9,16 @@ mod get {
 
     #[test]
     fn test_version() {
-        let mut app = test::init_service(App::new()
-            .service(web::resource("/version").route(
-                web::route()
-                    .guard(guard::Get())
-                    .to(|| HttpResponse::MethodNotAllowed())
-                    .to(routes::root::version))));
+        let mut app = test::init_service(
+            App::new().service(
+                web::resource("/version").route(
+                    web::route()
+                        .guard(guard::Get())
+                        .to(|| HttpResponse::MethodNotAllowed())
+                        .to(routes::root::version),
+                ),
+            ),
+        );
         // Create request object
         let req = test::TestRequest::get().uri("/version").to_request();
 
@@ -35,12 +39,16 @@ mod post {
 
     #[test]
     fn test_version() {
-        let mut app = test::init_service(App::new()
-            .service(web::resource("/version").route(
-                web::route()
-                    .guard(guard::Get())
-                    .to(|| HttpResponse::MethodNotAllowed())
-                    .to(routes::root::version))));
+        let mut app = test::init_service(
+            App::new().service(
+                web::resource("/version").route(
+                    web::route()
+                        .guard(guard::Get())
+                        .to(|| HttpResponse::MethodNotAllowed())
+                        .to(routes::root::version),
+                ),
+            ),
+        );
         // Create request object
         let req = test::TestRequest::post().uri("/version").to_request();
 
@@ -61,12 +69,16 @@ mod put {
 
     #[test]
     fn test_version() {
-        let mut app = test::init_service(App::new()
-            .service(web::resource("/version").route(
-                web::route()
-                    .guard(guard::Get())
-                    .to(|| HttpResponse::MethodNotAllowed())
-                    .to(routes::root::version))));
+        let mut app = test::init_service(
+            App::new().service(
+                web::resource("/version").route(
+                    web::route()
+                        .guard(guard::Get())
+                        .to(|| HttpResponse::MethodNotAllowed())
+                        .to(routes::root::version),
+                ),
+            ),
+        );
         // Create request object
         let req = test::TestRequest::put().uri("/version").to_request();
 
@@ -87,12 +99,16 @@ mod patch {
 
     #[test]
     fn test_version() {
-        let mut app = test::init_service(App::new()
-            .service(web::resource("/version").route(
-                web::route()
-                    .guard(guard::Get())
-                    .to(|| HttpResponse::MethodNotAllowed())
-                    .to(routes::root::version))));
+        let mut app = test::init_service(
+            App::new().service(
+                web::resource("/version").route(
+                    web::route()
+                        .guard(guard::Get())
+                        .to(|| HttpResponse::MethodNotAllowed())
+                        .to(routes::root::version),
+                ),
+            ),
+        );
         // Create request object
         let req = test::TestRequest::patch().uri("/version").to_request();
 
@@ -113,12 +129,16 @@ mod delete {
 
     #[test]
     fn test_version() {
-        let mut app = test::init_service(App::new()
-            .service(web::resource("/version").route(
-                web::route()
-                    .guard(guard::Get())
-                    .to(|| HttpResponse::MethodNotAllowed())
-                    .to(routes::root::version))));
+        let mut app = test::init_service(
+            App::new().service(
+                web::resource("/version").route(
+                    web::route()
+                        .guard(guard::Get())
+                        .to(|| HttpResponse::MethodNotAllowed())
+                        .to(routes::root::version),
+                ),
+            ),
+        );
         // Create request object
         let req = test::TestRequest::delete().uri("/version").to_request();
 

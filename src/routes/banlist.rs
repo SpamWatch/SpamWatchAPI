@@ -21,16 +21,18 @@ pub fn get_bans(req: HttpRequest) -> Result<HttpResponse, UserError> {
         let bans = db.get_bans()?;
         let mut nicer_bans: Vec<Value> = bans
             .iter()
-            .map(|ban| json!({
-                "id": ban.id,
-                "reason": ban.reason,
-                "date": ban.date.timestamp()
-            })).collect();
-        let bans_json = serde_json::to_value(nicer_bans)
-            .map_err(|e| {
-                error!(utils::LOGGER, "{}", e);
-                UserError::Internal
-            })?;
+            .map(|ban| {
+                json!({
+                    "id": ban.id,
+                    "reason": ban.reason,
+                    "date": ban.date.timestamp()
+                })
+            })
+            .collect();
+        let bans_json = serde_json::to_value(nicer_bans).map_err(|e| {
+            error!(utils::LOGGER, "{}", e);
+            UserError::Internal
+        })?;
 
         Ok(HttpResponse::Ok().json(bans_json))
     } else {
@@ -38,8 +40,10 @@ pub fn get_bans(req: HttpRequest) -> Result<HttpResponse, UserError> {
     }
 }
 
-
-pub fn post_bans(req: HttpRequest, data: web::Json<Vec<CreateBan>>) -> Result<HttpResponse, UserError> {
+pub fn post_bans(
+    req: HttpRequest,
+    data: web::Json<Vec<CreateBan>>,
+) -> Result<HttpResponse, UserError> {
     let guard = PermissionGuard::new(utils::get_auth_token(&req)?)?;
     if guard.admin() {
         let mut db = Database::new()?;
@@ -47,7 +51,7 @@ pub fn post_bans(req: HttpRequest, data: web::Json<Vec<CreateBan>>) -> Result<Ht
             if !ban.reason.is_empty() {
                 db.add_ban(ban.id, &ban.reason)?;
             } else {
-                return Err(UserError::BadRequest)
+                return Err(UserError::BadRequest);
             }
         }
         Ok(HttpResponse::NoContent().body(""))
@@ -65,11 +69,11 @@ pub fn get_ban(req: HttpRequest) -> Result<HttpResponse, UserError> {
     let mut db = Database::new()?;
     match db.get_ban(user_id)? {
         Some(ban) => Ok(HttpResponse::Ok().json(serde_json::to_value(json!({
-                "id": ban.id,
-                "reason": ban.reason,
-                "date": ban.date.timestamp()
-            }))?)),
-        None => Err(UserError::NotFound)
+            "id": ban.id,
+            "reason": ban.reason,
+            "date": ban.date.timestamp()
+        }))?)),
+        None => Err(UserError::NotFound),
     }
 }
 
@@ -88,7 +92,7 @@ pub fn delete_ban(req: HttpRequest) -> Result<HttpResponse, UserError> {
                 db.delete_ban(user_id)?;
                 Ok(HttpResponse::NoContent().body(""))
             }
-            None => Err(UserError::NotFound)
+            None => Err(UserError::NotFound),
         }
     } else {
         Err(UserError::Forbidden)

@@ -27,12 +27,10 @@ impl PermissionGuard {
         if !token_header.is_empty() {
             let token = match db.get_token(token_header)? {
                 Some(token) => token,
-                None => return Err(UserError::Unauthorized)
+                None => return Err(UserError::Unauthorized),
             };
 
-            Ok(PermissionGuard {
-                token,
-            })
+            Ok(PermissionGuard { token })
         } else {
             return Err(UserError::Unauthorized);
         }
@@ -42,14 +40,14 @@ impl PermissionGuard {
         match self.token.permission {
             Permission::Admin => true,
             Permission::Root => true,
-            _ => false
+            _ => false,
         }
     }
 
     pub fn root(&self) -> bool {
         match self.token.permission {
             Permission::Root => true,
-            _ => false
+            _ => false,
         }
     }
 }
