@@ -44,7 +44,11 @@ pub fn post_bans(req: HttpRequest, data: web::Json<Vec<CreateBan>>) -> Result<Ht
     if guard.admin() {
         let mut db = Database::new()?;
         for ban in data.iter() {
-            db.add_ban(ban.id, &ban.reason)?;
+            if !ban.reason.is_empty() {
+                db.add_ban(ban.id, &ban.reason)?;
+            } else {
+                return Err(UserError::BadRequest)
+            }
         }
         Ok(HttpResponse::NoContent().body(""))
     } else {
