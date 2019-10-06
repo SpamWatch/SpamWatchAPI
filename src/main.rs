@@ -30,9 +30,6 @@ fn setup_database() -> Result<i32, postgres::Error> {
     };
     db.setup_tables()?;
     db.create_genesis_token()?;
-//    for i in 1..10 {
-//        db.create_token(&Permission::User, i);
-//    }
     Ok(0)
 }
 
