@@ -25,6 +25,7 @@ lazy_static! {
 pub struct General {
     pub masterid: i32,
     pub token_size: u8,
+    pub staging: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -66,6 +67,7 @@ impl Default for Settings {
             general: General {
                 masterid: 777000,
                 token_size: 64,
+                staging: false,
             },
         }
     }
