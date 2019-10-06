@@ -38,7 +38,7 @@ pub fn post_tokens(req: HttpRequest, data: web::Json<CreateToken>) -> Result<Htt
         let mut db = Database::new()?;
         let token = db.create_token(&data.permission, data.id)?;
         match db.get_token(token)? {
-            Some(token) => Ok(HttpResponse::Ok().json(token.json()?)),
+            Some(token) => Ok(HttpResponse::Created().json(token.json()?)),
             None => Err(UserError::NotFound)
         }
     } else {
