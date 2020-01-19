@@ -16,7 +16,7 @@ pub struct CreateBan {
 
 pub fn get_bans(req: HttpRequest) -> Result<HttpResponse, UserError> {
     let guard = PermissionGuard::new(utils::get_auth_token(&req)?)?;
-    if guard.admin() {
+    if guard.root() {
         let mut db = Database::new()?;
         let bans = db.get_bans()?;
         let mut nicer_bans: Vec<Value> = bans
