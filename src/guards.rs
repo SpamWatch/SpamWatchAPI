@@ -30,6 +30,10 @@ impl PermissionGuard {
                 None => return Err(UserError::Unauthorized),
             };
 
+            if token.retired {
+                return Err(UserError::Unauthorized)
+            }
+
             Ok(PermissionGuard { token })
         } else {
             return Err(UserError::Unauthorized);

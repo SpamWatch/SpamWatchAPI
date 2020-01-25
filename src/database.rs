@@ -17,6 +17,7 @@ pub struct Token {
     pub token: String,
     pub permission: Permission,
     pub userid: i32,
+    pub retired: bool,
 }
 
 #[derive(Debug, Serialize)]
@@ -74,10 +75,11 @@ impl Database {
 
         let create_tokens = "
             CREATE TABLE IF NOT EXISTS tokens (
-                id SERIAL,
-                token Text NOT NULL PRIMARY KEY,
+                id SERIAL PRIMARY KEY,
+                token Text NOT NULL,
                 permission permission NOT NULL,
-                userid integer NOT NULL);";
+                userid integer NOT NULL,
+                retired bool NOT NULL DEFAULT false);";
 
         debug!(utils::LOGGER, "Creating Table if it doesn't exist";
             "query" => create_tokens,  "name" => "tokens");
@@ -112,6 +114,7 @@ impl Database {
                 token: row.get(1),
                 permission: row.get(2),
                 userid: row.get(3),
+                retired: row.get(4),
             })
             .collect())
     }
@@ -128,6 +131,7 @@ impl Database {
                 token: token.get(1),
                 permission: token.get(2),
                 userid: token.get(3),
+                retired: token.get(4),
             }),
             None => None,
         })
@@ -144,6 +148,7 @@ impl Database {
                 token: token.get(1),
                 permission: token.get(2),
                 userid: token.get(3),
+                retired: token.get(4),
             }),
             None => None,
         })
@@ -167,11 +172,11 @@ impl Database {
         Ok(token)
     }
 
-    pub fn delete_token_by_id(&mut self, token_id: i32) -> Result<(), postgres::Error> {
-        let delete_token_by_id = "DELETE FROM tokens WHERE id = $1;";
-        debug!(utils::LOGGER, "Deleting token by id";
-            "id" => token_id, "query" => delete_token_by_id);
-        self.conn.query(delete_token_by_id, &[&token_id])?;
+    pub fn revoke_token_by_id(&mut self, token_id: i32) -> Result<(), postgres::Error> {
+        let revoke_token_by_id = "UPDATE tokens SET retired = true WHERE id = $1;";
+        debug!(utils::LOGGER, "Revoking token by id";
+            "id" => token_id, "query" => revoke_token_by_id);
+        self.conn.query(revoke_token_by_id, &[&token_id])?;
         Ok(())
     }
     //endregion

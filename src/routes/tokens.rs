@@ -84,7 +84,7 @@ pub fn delete_token(req: HttpRequest) -> Result<HttpResponse, UserError> {
         })?;
         match db.get_token_by_id(token_id)? {
             Some(token) => {
-                db.delete_token_by_id(token_id)?;
+                db.revoke_token_by_id(token_id)?;
                 Ok(HttpResponse::NoContent().body(""))
             }
             None => Err(UserError::NotFound),
