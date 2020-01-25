@@ -21,13 +21,7 @@ pub fn get_bans(req: HttpRequest) -> Result<HttpResponse, UserError> {
         let bans = db.get_bans()?;
         let mut nicer_bans: Vec<Value> = bans
             .iter()
-            .map(|ban| {
-                json!({
-                    "id": ban.id,
-                    "reason": ban.reason,
-                    "date": ban.date.timestamp()
-                })
-            })
+            .map(|ban| ban.raw_json())
             .collect();
         let bans_json = serde_json::to_value(nicer_bans).map_err(|e| {
             error!(utils::LOGGER, "{}", e);
@@ -68,11 +62,7 @@ pub fn get_ban(req: HttpRequest) -> Result<HttpResponse, UserError> {
     })?;
     let mut db = Database::new()?;
     match db.get_ban(user_id)? {
-        Some(ban) => Ok(HttpResponse::Ok().json(serde_json::to_value(json!({
-            "id": ban.id,
-            "reason": ban.reason,
-            "date": ban.date.timestamp()
-        }))?)),
+        Some(ban) => Ok(HttpResponse::Ok().json(ban.json()?)),
         None => Err(UserError::NotFound),
     }
 }

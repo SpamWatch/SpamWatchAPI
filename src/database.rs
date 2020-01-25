@@ -1,6 +1,6 @@
 use postgres::{Client, Config, NoTls, Row};
 use serde::Serialize;
-use serde_json::Value;
+use serde_json::{json, Value};
 
 use crate::errors::UserError;
 use crate::guards::Permission;
@@ -25,11 +25,27 @@ pub struct Ban {
     pub id: i32,
     pub reason: String,
     pub date: chrono::NaiveDateTime,
+    pub admin: i32,
 }
 
 impl Token {
     pub fn json(&self) -> Result<Value, UserError> {
         Ok(serde_json::to_value(&self)?)
+    }
+}
+
+impl Ban {
+    pub fn json(&self) -> Result<Value, UserError> {
+        Ok(serde_json::to_value(self.raw_json())?)
+    }
+
+    pub fn raw_json(&self) -> Value {
+        json!({
+            "id": self.id,
+            "reason": self.reason,
+            "date": self.date.timestamp(),
+            "admin": self.admin
+        })
     }
 }
 
@@ -195,6 +211,7 @@ impl Database {
                 id: row.get(0),
                 reason: row.get(1),
                 date: row.get(2),
+                admin: row.get(3),
             })
             .collect())
     }
@@ -222,6 +239,7 @@ impl Database {
                 id: ban.get(0),
                 reason: ban.get(1),
                 date: ban.get(2),
+                admin: ban.get(3),
             }),
             None => None,
         })
