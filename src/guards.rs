@@ -18,7 +18,7 @@ pub enum Permission {
 
 #[derive(Debug)]
 pub struct PermissionGuard {
-    token: Token,
+    pub token: Token,
 }
 
 impl PermissionGuard {

@@ -53,14 +53,6 @@ impl Database {
     }
 
     pub fn setup_tables(&mut self) -> Result<(), postgres::Error> {
-        let create_banlist = "
-            CREATE TABLE IF NOT EXISTS banlist (
-                id integer NOT NULL PRIMARY KEY,
-                reason Text NOT NULL,
-                date timestamp NOT NULL);";
-        debug!(utils::LOGGER, "Creating Table if it doesn't exist";
-            "query" => create_banlist, "name" => "banlist");
-        self.conn.simple_query(create_banlist)?;
 
         let permission_enum = "
             DO $$
@@ -84,6 +76,17 @@ impl Database {
         debug!(utils::LOGGER, "Creating Table if it doesn't exist";
             "query" => create_tokens,  "name" => "tokens");
         self.conn.simple_query(create_tokens)?;
+
+        let create_banlist = "
+            CREATE TABLE IF NOT EXISTS banlist (
+                id integer NOT NULL PRIMARY KEY,
+                reason Text NOT NULL,
+                date timestamp NOT NULL,
+                admin_token integer references tokens(id) NOT NULL);";
+        debug!(utils::LOGGER, "Creating Table if it doesn't exist";
+            "query" => create_banlist, "name" => "banlist");
+        self.conn.simple_query(create_banlist)?;
+
         Ok(())
     }
 
@@ -196,15 +199,15 @@ impl Database {
             .collect())
     }
 
-    pub fn add_ban(&mut self, user_id: i32, reason: &String) -> Result<(), postgres::Error> {
+    pub fn add_ban(&mut self, user_id: i32, reason: &String, admin_token: i32) -> Result<(), postgres::Error> {
         let upsert_ban = "
             INSERT INTO banlist
-            VALUES ($1, $2, now())
+            VALUES ($1, $2, now(), $3)
             ON CONFLICT (id) DO
             UPDATE SET reason=EXCLUDED.reason, date=excluded.date;";
         debug!(utils::LOGGER, "Upserting ban";
             "id" => &user_id, "reason" => &reason, "query" => upsert_ban);
-        self.conn.query(upsert_ban, &[&user_id, &reason])?;
+        self.conn.query(upsert_ban, &[&user_id, &reason, &admin_token])?;
         Ok(())
     }
 

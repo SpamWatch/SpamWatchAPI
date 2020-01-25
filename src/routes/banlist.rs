@@ -49,7 +49,7 @@ pub fn post_bans(
         let mut db = Database::new()?;
         for ban in data.iter() {
             if !ban.reason.is_empty() {
-                db.add_ban(ban.id, &ban.reason)?;
+                db.add_ban(ban.id, &ban.reason, guard.token.id)?;
             } else {
                 return Err(UserError::BadRequest);
             }
