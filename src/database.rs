@@ -16,13 +16,13 @@ pub struct Token {
     pub id: i32,
     pub token: String,
     pub permission: Permission,
-    pub userid: i32,
+    pub userid: i64,
     pub retired: bool,
 }
 
 #[derive(Debug, Serialize)]
 pub struct Ban {
-    pub id: i32,
+    pub id: i64,
     pub reason: String,
     pub date: chrono::NaiveDateTime,
     pub admin: i32,
@@ -86,7 +86,7 @@ impl Database {
                 id SERIAL PRIMARY KEY,
                 token Text NOT NULL,
                 permission permission NOT NULL,
-                userid integer NOT NULL,
+                userid bigint NOT NULL,
                 retired bool NOT NULL DEFAULT false);";
 
         debug!(utils::LOGGER, "Creating Table if it doesn't exist";
@@ -95,7 +95,7 @@ impl Database {
 
         let create_banlist = "
             CREATE TABLE IF NOT EXISTS banlist (
-                id integer NOT NULL PRIMARY KEY,
+                id bigint NOT NULL PRIMARY KEY,
                 reason Text NOT NULL,
                 date timestamp NOT NULL,
                 admin_token integer references tokens(id) NOT NULL);";
@@ -176,7 +176,7 @@ impl Database {
     pub fn create_token(
         &mut self,
         permission: &Permission,
-        userid: i32,
+        userid: i64,
     ) -> Result<String, postgres::Error> {
         let token = nanoid::generate(settings::ENV.general.token_size as usize);
         let insert_token = "
@@ -216,7 +216,7 @@ impl Database {
             .collect())
     }
 
-    pub fn add_ban(&mut self, user_id: i32, reason: &String, admin_token: i32) -> Result<(), postgres::Error> {
+    pub fn add_ban(&mut self, user_id: i64, reason: &String, admin_token: i32) -> Result<(), postgres::Error> {
         let upsert_ban = "
             INSERT INTO banlist
             VALUES ($1, $2, now(), $3)
@@ -228,7 +228,7 @@ impl Database {
         Ok(())
     }
 
-    pub fn get_ban(&mut self, user_id: i32) -> Result<Option<Ban>, postgres::Error> {
+    pub fn get_ban(&mut self, user_id: i64) -> Result<Option<Ban>, postgres::Error> {
         let get_ban = "SELECT * FROM banlist WHERE id = $1;";
         debug!(utils::LOGGER, "Getting token by id";
             "id" => user_id, "query" => get_ban);
@@ -245,7 +245,7 @@ impl Database {
         })
     }
 
-    pub fn delete_ban(&mut self, user_id: i32) -> Result<(), postgres::Error> {
+    pub fn delete_ban(&mut self, user_id: i64) -> Result<(), postgres::Error> {
         let delete_ban = "DELETE FROM banlist WHERE id = $1;";
         debug!(utils::LOGGER, "Deleting ban";
             "id" => user_id, "query" => delete_ban);

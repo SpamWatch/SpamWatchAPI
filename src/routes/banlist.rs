@@ -10,7 +10,7 @@ use crate::utils;
 
 #[derive(Debug, Deserialize)]
 pub struct CreateBan {
-    id: i32,
+    id: i64,
     reason: String,
 }
 
@@ -56,7 +56,7 @@ pub fn post_bans(
 
 pub fn get_ban(req: HttpRequest) -> Result<HttpResponse, UserError> {
     let guard = PermissionGuard::new(utils::get_auth_token(&req)?)?;
-    let user_id: i32 = req.match_info().get("id").unwrap().parse().map_err(|e| {
+    let user_id: i64 = req.match_info().get("id").unwrap().parse().map_err(|e| {
         error!(utils::LOGGER, "{}", e);
         UserError::BadRequest
     })?;
@@ -70,7 +70,7 @@ pub fn get_ban(req: HttpRequest) -> Result<HttpResponse, UserError> {
 pub fn delete_ban(req: HttpRequest) -> Result<HttpResponse, UserError> {
     let guard = PermissionGuard::new(utils::get_auth_token(&req)?)?;
     if guard.admin() {
-        let user_id: i32 = req.match_info().get("id").unwrap().parse().map_err(|e| {
+        let user_id: i64 = req.match_info().get("id").unwrap().parse().map_err(|e| {
             error!(utils::LOGGER, "{}", e);
             UserError::BadRequest
         })?;

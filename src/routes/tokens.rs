@@ -10,7 +10,7 @@ use crate::utils;
 
 #[derive(Debug, Deserialize)]
 pub struct CreateToken {
-    id: i32,
+    id: i64,
     permission: Permission,
 }
 

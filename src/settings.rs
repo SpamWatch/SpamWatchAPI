@@ -23,7 +23,7 @@ lazy_static! {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct General {
-    pub masterid: i32,
+    pub masterid: i64,
     pub token_size: u8,
     pub staging: bool,
 }
