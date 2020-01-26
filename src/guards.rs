@@ -1,11 +1,11 @@
-use postgres_derive::{FromSql, ToSql};
+use postgres_types::{ToSql, FromSql};
 use serde::{Deserialize, Serialize};
 
 use crate::database::Database;
 use crate::database::Token;
 use crate::errors::UserError;
 
-#[derive(Debug, FromSql, ToSql, Serialize, Deserialize)]
+#[derive(Debug, ToSql, FromSql, Serialize, Deserialize)]
 #[postgres(name = "permission")]
 pub enum Permission {
     // Can read from the API
