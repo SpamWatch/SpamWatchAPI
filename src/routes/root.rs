@@ -43,15 +43,10 @@ pub fn version() -> HttpResponse {
 }
 
 pub fn stats(req: HttpRequest) -> Result<HttpResponse, UserError> {
-    let guard = PermissionGuard::new(utils::get_auth_token(&req)?)?;
-    if guard.admin() {
-        let mut db = Database::new()?;
-        let total_ban_count = db.get_total_ban_count()?;
-        let stats = json!({
-            "total_ban_count": total_ban_count
-        });
-        Ok(HttpResponse::Ok().json(serde_json::to_value(stats)?))
-    } else {
-        Err(UserError::Forbidden)
-    }
+    let mut db = Database::new()?;
+    let total_ban_count = db.get_total_ban_count()?;
+    let stats = json!({
+        "total_ban_count": total_ban_count
+    });
+    Ok(HttpResponse::Ok().json(serde_json::to_value(stats)?))
 }
