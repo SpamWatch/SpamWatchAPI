@@ -216,6 +216,17 @@ impl Database {
             .collect())
     }
 
+    pub fn get_total_ban_count(&mut self) -> Result<i64, postgres::Error> {
+        let get_all_bans = "SELECT COUNT(*) FROM banlist;";
+        debug!(utils::LOGGER, "Getting all bans"; "query" => get_all_bans);
+        let result: Vec<Row> = self.conn.query(get_all_bans, &[])?;
+        let count = match result.get(0) {
+            Some(row) => row.get(0),
+            None => 0
+        };
+        Ok(count)
+    }
+
     pub fn add_ban(&mut self, user_id: i64, reason: &String, admin_token: i32) -> Result<(), postgres::Error> {
         let upsert_ban = "
             INSERT INTO banlist

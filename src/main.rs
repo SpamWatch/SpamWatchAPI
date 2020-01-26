@@ -62,6 +62,7 @@ fn run() -> Result<i32, postgres::Error> {
                     .route(web::head().to(routes::root::info)),
             )
             .service(web::resource("/version").route(web::get().to(routes::root::version)))
+            .service(web::resource("/stats").route(web::get().to(routes::root::stats)))
             .service(
                 web::resource("/tokens")
                     .route(web::get().to(routes::tokens::get_tokens))
