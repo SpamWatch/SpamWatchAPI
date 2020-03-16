@@ -6,6 +6,13 @@ masterid = 777000
 
 [database]
 host = "127.0.0.1"
+port = 5432
 password = "password"
 username = "SpamWatchAPI"
 name = "SpamWatchAPI"
+
+[server]
+# this is required for docker containers, to be available from
+# bridge, for any exposed port
+host = "0.0.0.0"
+port = 6345

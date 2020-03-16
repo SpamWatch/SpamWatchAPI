@@ -1,0 +1,10 @@
+FROM rust:1.36
+
+WORKDIR /app/spamwatch-api
+
+COPY ./ /app/spamwatch-api
+
+RUN cargo build --release
+
+CMD ["cargo", "run"]
+
