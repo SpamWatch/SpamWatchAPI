@@ -1,0 +1,9 @@
+## Basic Info
+site_name: SpamWatch API Server-side Docs
+site_url: https://spamwatch-api-docs.devhubcentral.ml
+site_description: WIP Documentation for SpamWatch API server
+
+## Repository Metadata
+repo_url: https://gitlab.com/MadeByThePinsTeam-DevLabs/forks/SpamWatchAPI
+repo_name: 'GitLab'
+edit_uri: blob/master/docs/source
