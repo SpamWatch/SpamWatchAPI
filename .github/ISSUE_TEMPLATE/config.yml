@@ -1,0 +1,14 @@
+## Disallow blank issues from being used.
+blank_issues_enabled: false
+
+## Contact links
+contact_links:
+  - name: SpamWatch API Client-Side Docs
+    url: https://docs.spamwat.ch
+    about: Before reaching support or even creating a issue here, read the client-side docs first.
+  - name: SpamWatch API Server-Side Docs
+    url: https://spamwatch-api-docs.devhubcentral.ml
+    about: Before reaching support or even creating a issue here, read the server-side docs first.
+  - name: SpamWatch Support Chat
+    url: https://support.spamwat.ch
+    about: Please be nice and don't be jerk when requesting unbans.
