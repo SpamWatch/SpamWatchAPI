@@ -4,7 +4,7 @@ use serde_json::{json, Value};
 
 use crate::database::{Ban, Database, Token};
 use crate::errors::UserError;
-use crate::guards::{Permission, PermissionGuard};
+use crate::guards::{Permission, TokenGuard};
 use crate::guards::Permission::User;
 use crate::utils;
 
@@ -15,7 +15,7 @@ pub struct CreateBan {
 }
 
 pub fn get_bans(req: HttpRequest) -> Result<HttpResponse, UserError> {
-    let guard = PermissionGuard::new(utils::get_auth_token(&req)?)?;
+    let guard = TokenGuard::new(utils::get_auth_token(&req)?)?;
     if guard.root() {
         let mut db = Database::new()?;
         let bans = db.get_bans()?;
@@ -38,7 +38,7 @@ pub fn post_bans(
     req: HttpRequest,
     data: web::Json<Vec<CreateBan>>,
 ) -> Result<HttpResponse, UserError> {
-    let guard = PermissionGuard::new(utils::get_auth_token(&req)?)?;
+    let guard = TokenGuard::new(utils::get_auth_token(&req)?)?;
     if guard.admin() {
         let mut db = Database::new()?;
         for ban in data.iter() {
@@ -55,7 +55,7 @@ pub fn post_bans(
 }
 
 pub fn get_ban(req: HttpRequest) -> Result<HttpResponse, UserError> {
-    let guard = PermissionGuard::new(utils::get_auth_token(&req)?)?;
+    let guard = TokenGuard::new(utils::get_auth_token(&req)?)?;
     let user_id: i64 = req.match_info().get("id").unwrap().parse().map_err(|e| {
         error!(utils::LOGGER, "{}", e);
         UserError::BadRequest
@@ -68,7 +68,7 @@ pub fn get_ban(req: HttpRequest) -> Result<HttpResponse, UserError> {
 }
 
 pub fn delete_ban(req: HttpRequest) -> Result<HttpResponse, UserError> {
-    let guard = PermissionGuard::new(utils::get_auth_token(&req)?)?;
+    let guard = TokenGuard::new(utils::get_auth_token(&req)?)?;
     if guard.admin() {
         let user_id: i64 = req.match_info().get("id").unwrap().parse().map_err(|e| {
             error!(utils::LOGGER, "{}", e);
@@ -90,7 +90,7 @@ pub fn delete_ban(req: HttpRequest) -> Result<HttpResponse, UserError> {
 }
 
 pub fn get_bans_id_list(req: HttpRequest) -> Result<HttpResponse, UserError> {
-    let guard = PermissionGuard::new(utils::get_auth_token(&req)?)?;
+    let guard = TokenGuard::new(utils::get_auth_token(&req)?)?;
     let mut db = Database::new()?;
     let bans = db.get_banned_ids()?;
     let mut nicer_bans: Vec<&i64> = bans

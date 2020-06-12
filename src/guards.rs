@@ -17,12 +17,12 @@ pub enum Permission {
 }
 
 #[derive(Debug)]
-pub struct PermissionGuard {
+pub struct TokenGuard {
     pub token: Token,
 }
 
-impl PermissionGuard {
-    pub fn new(token_header: String) -> Result<PermissionGuard, UserError> {
+impl TokenGuard {
+    pub fn new(token_header: String) -> Result<TokenGuard, UserError> {
         let mut db = Database::new()?;
         if !token_header.is_empty() {
             let token = match db.get_token(token_header)? {
@@ -34,7 +34,7 @@ impl PermissionGuard {
                 return Err(UserError::Unauthorized)
             }
 
-            Ok(PermissionGuard { token })
+            Ok(TokenGuard { token })
         } else {
             return Err(UserError::Unauthorized);
         }

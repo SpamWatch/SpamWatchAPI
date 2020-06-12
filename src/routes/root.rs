@@ -3,7 +3,7 @@ use serde_json::{json, Value};
 
 use crate::{settings, utils};
 use crate::errors::UserError;
-use crate::guards::PermissionGuard;
+use crate::guards::TokenGuard;
 use crate::database::Database;
 
 fn safe_href(name: &str, url: &str) -> String {

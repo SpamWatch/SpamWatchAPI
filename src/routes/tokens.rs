@@ -4,7 +4,7 @@ use serde_json::Value;
 
 use crate::database::{Database, Token};
 use crate::errors::UserError;
-use crate::guards::{Permission, PermissionGuard};
+use crate::guards::{Permission, TokenGuard};
 use crate::guards::Permission::User;
 use crate::utils;
 
@@ -15,7 +15,7 @@ pub struct CreateToken {
 }
 
 pub fn get_tokens(req: HttpRequest) -> Result<HttpResponse, UserError> {
-    let guard = PermissionGuard::new(utils::get_auth_token(&req)?)?;
+    let guard = TokenGuard::new(utils::get_auth_token(&req)?)?;
     if guard.root() {
         let mut db = Database::new()?;
         let tokens = db.get_tokens()?;
@@ -34,7 +34,7 @@ pub fn post_tokens(
     req: HttpRequest,
     data: web::Json<CreateToken>,
 ) -> Result<HttpResponse, UserError> {
-    let guard = PermissionGuard::new(utils::get_auth_token(&req)?)?;
+    let guard = TokenGuard::new(utils::get_auth_token(&req)?)?;
     if guard.root() {
         let mut db = Database::new()?;
         let token = db.create_token(&data.permission, data.id)?;
@@ -48,7 +48,7 @@ pub fn post_tokens(
 }
 
 pub fn get_token(req: HttpRequest) -> Result<HttpResponse, UserError> {
-    let guard = PermissionGuard::new(utils::get_auth_token(&req)?)?;
+    let guard = TokenGuard::new(utils::get_auth_token(&req)?)?;
 
     let mut db = Database::new()?;
     let _id = req.match_info().get("id").unwrap();
@@ -74,7 +74,7 @@ pub fn get_token(req: HttpRequest) -> Result<HttpResponse, UserError> {
 }
 
 pub fn delete_token(req: HttpRequest) -> Result<HttpResponse, UserError> {
-    let guard = PermissionGuard::new(utils::get_auth_token(&req)?)?;
+    let guard = TokenGuard::new(utils::get_auth_token(&req)?)?;
 
     if guard.root() {
         let mut db = Database::new()?;
