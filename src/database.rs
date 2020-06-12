@@ -1,3 +1,6 @@
+use std::fmt;
+
+use chrono::NaiveDateTime;
 use postgres::{Client, Config, NoTls, Row};
 use serde::Serialize;
 use serde_json::{json, Value};
@@ -28,6 +31,16 @@ pub struct Ban {
     pub admin: i32,
 }
 
+#[derive(Debug, Serialize)]
+pub struct Antiflood {
+    pub banlist_all: NaiveDateTime,
+}
+
+#[derive(Debug)]
+pub enum AntifloodColumn {
+    BanlistAll,
+}
+
 impl Token {
     pub fn json(&self) -> Result<Value, UserError> {
         Ok(serde_json::to_value(&self)?)
@@ -46,6 +59,27 @@ impl Ban {
             "date": self.date.timestamp(),
             "admin": self.admin
         })
+    }
+}
+
+impl fmt::Display for AntifloodColumn {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // The `f` value implements the `Write` trait, which is what the
+        // write! macro is expecting. Note that this formatting ignores the
+        // various flags provided to format strings.
+
+        let name = match self {
+            AntifloodColumn::BanlistAll => "banlist_all"
+        };
+        write!(f, "{}", name)
+    }
+}
+
+impl Default for Antiflood {
+    fn default() -> Self {
+        Antiflood {
+            banlist_all: NaiveDateTime::from_timestamp(0, 0)
+        }
     }
 }
 
@@ -234,6 +268,34 @@ impl Database {
             "id" => user_id, "query" => delete_ban);
         let row: Option<Row> = self.conn.query(delete_ban, &[&user_id])?.pop();
 
+        Ok(())
+    }
+    //endregion
+
+    //region Antiflood
+    pub fn get_antiflood(&mut self, token_id: i32) -> Result<Antiflood, postgres::Error> {
+        let get_ban = "SELECT (banlist_all) FROM antiflood WHERE token = $1;";
+        debug!(utils::LOGGER, "Getting token antiflood settings";
+            "token" => token_id, "query" => get_ban);
+        let row: Option<Row> = self.conn.query(get_ban, &[&token_id])?.pop();
+
+        Ok(match row {
+            Some(antiflood) => Antiflood {
+                banlist_all: antiflood.get(0),
+            },
+            None => Antiflood::default(),
+        })
+    }
+
+    pub fn set_antiflood_banlist_all(&mut self, token_id: i32, time: NaiveDateTime) -> Result<(), postgres::Error> {
+        let upsert_antiflood = "
+            INSERT INTO antiflood (token, banlist_all)
+            VALUES ($1, $2)
+            ON CONFLICT (token) DO
+            UPDATE SET banlist_all=EXCLUDED.banlist_all;";
+        debug!(utils::LOGGER, "Updating antiflood";
+            "token" => &token_id, "column" => "banlist_all", "query" => upsert_antiflood);
+        self.conn.query(upsert_antiflood, &[&token_id, &time])?;
         Ok(())
     }
     //endregion

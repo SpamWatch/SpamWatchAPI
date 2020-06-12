@@ -90,13 +90,14 @@ pub fn delete_ban(req: HttpRequest) -> Result<HttpResponse, UserError> {
 }
 
 pub fn get_bans_id_list(req: HttpRequest) -> Result<HttpResponse, UserError> {
-    let guard = TokenGuard::new(utils::get_auth_token(&req)?)?;
+    let mut guard = TokenGuard::new(utils::get_auth_token(&req)?)?;
+    guard.banlist_all()?;
     let mut db = Database::new()?;
     let bans = db.get_banned_ids()?;
     let mut nicer_bans: Vec<&i64> = bans
         .iter()
         .collect();
-    let response: Vec<String> = nicer_bans.iter().map(|i|i.to_string()).collect();
+    let response: Vec<String> = nicer_bans.iter().map(|i| i.to_string()).collect();
 
     Ok(HttpResponse::Ok().body(response.join("\n")))
 }

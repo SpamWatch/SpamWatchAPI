@@ -1,7 +1,8 @@
-use postgres_types::{ToSql, FromSql};
+use chrono::{Duration, FixedOffset, NaiveDateTime, NaiveTime, Timelike, Utc};
+use postgres_types::{FromSql, ToSql};
 use serde::{Deserialize, Serialize};
 
-use crate::database::Database;
+use crate::database::{Antiflood, AntifloodColumn, Database};
 use crate::database::Token;
 use crate::errors::UserError;
 
@@ -16,9 +17,11 @@ pub enum Permission {
     Root,
 }
 
-#[derive(Debug)]
+
 pub struct TokenGuard {
     pub token: Token,
+    db: Database,
+    antiflood: Antiflood,
 }
 
 impl TokenGuard {
@@ -29,12 +32,13 @@ impl TokenGuard {
                 Some(token) => token,
                 None => return Err(UserError::Unauthorized),
             };
+            let antiflood = db.get_antiflood(token.id)?;
 
             if token.retired {
-                return Err(UserError::Unauthorized)
+                return Err(UserError::Unauthorized);
             }
 
-            Ok(TokenGuard { token })
+            Ok(TokenGuard { token, db, antiflood })
         } else {
             return Err(UserError::Unauthorized);
         }
@@ -52,6 +56,20 @@ impl TokenGuard {
         match self.token.permission {
             Permission::Root => true,
             _ => false,
+        }
+    }
+
+    pub fn banlist_all(&mut self) -> Result<(), UserError> {
+        if self.admin() {
+            return Ok(())
+        }
+        let current_time = NaiveDateTime::from_timestamp(Utc::now().timestamp(), 0);
+        if self.antiflood.banlist_all < current_time {
+            self.db.set_antiflood_banlist_all(self.token.id,
+                                              current_time + Duration::minutes(30))?;
+            Ok(())
+        } else {
+            return Err(UserError::TooManyRequests { until: self.antiflood.banlist_all.timestamp() });
         }
     }
 }

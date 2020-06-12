@@ -17,6 +17,9 @@ pub enum UserError {
     MethodNotAllowed,
     Unauthorized,
     Forbidden,
+    TooManyRequests {
+        until: i64,
+    },
 }
 
 impl From<postgres::Error> for UserError {
@@ -76,6 +79,11 @@ impl UserError {
                 "code": StatusCode::FORBIDDEN.as_u16(),
                 "error": StatusCode::FORBIDDEN.canonical_reason()
             }),
+            UserError::TooManyRequests { until } => json!({
+                "code": StatusCode::TOO_MANY_REQUESTS.as_u16(),
+                "error": StatusCode::TOO_MANY_REQUESTS.canonical_reason(),
+                "until": until
+            }),
         }
     }
 
@@ -87,6 +95,7 @@ impl UserError {
             UserError::MethodNotAllowed => HttpResponse::MethodNotAllowed().json(self.to_json()),
             UserError::Unauthorized => HttpResponse::Unauthorized().json(self.to_json()),
             UserError::Forbidden => HttpResponse::Forbidden().json(self.to_json()),
+            UserError::TooManyRequests {until} => HttpResponse::TooManyRequests().json(self.to_json()),
         }
     }
 }
