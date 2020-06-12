@@ -6,6 +6,7 @@ edition = "2018"
 description = "API for t.me/SpamWatch to query User IDs for their ban status and reason."
 homepage = "https://github.com/SpamWatch/SpamWatchAPI"
 repository = "https://github.com/SpamWatch/SpamWatchAPI"
+license = "AGPL-3.0"
 
 [dependencies]
 nanoid = "0.2"
