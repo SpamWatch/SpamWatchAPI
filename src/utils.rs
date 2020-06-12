@@ -30,5 +30,5 @@ pub fn get_auth_token(req: &HttpRequest) -> Result<String, UserError> {
         }
     };
     let _token: Vec<&str> = token_header.split_ascii_whitespace().collect();
-    Ok(_token[1].to_string())
+    Ok(_token.get(1).ok_or(UserError::BadRequest)?.to_string())
 }
