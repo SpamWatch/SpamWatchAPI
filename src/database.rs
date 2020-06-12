@@ -216,6 +216,16 @@ impl Database {
             .collect())
     }
 
+    pub fn get_banned_ids(&mut self) -> Result<Vec<i64>, postgres::Error> {
+        let get_all_bans = "SELECT id FROM banlist;";
+        debug!(utils::LOGGER, "Getting all bans as ids"; "query" => get_all_bans);
+        let result: Vec<Row> = self.conn.query(get_all_bans, &[])?;
+        Ok(result
+            .into_iter()
+            .map(|row| row.get(0))
+            .collect())
+    }
+
     pub fn get_total_ban_count(&mut self) -> Result<i64, postgres::Error> {
         let get_all_bans = "SELECT COUNT(*) FROM banlist;";
         debug!(utils::LOGGER, "Getting all bans"; "query" => get_all_bans);

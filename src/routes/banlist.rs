@@ -88,3 +88,15 @@ pub fn delete_ban(req: HttpRequest) -> Result<HttpResponse, UserError> {
         Err(UserError::Forbidden)
     }
 }
+
+pub fn get_bans_id_list(req: HttpRequest) -> Result<HttpResponse, UserError> {
+    let guard = PermissionGuard::new(utils::get_auth_token(&req)?)?;
+    let mut db = Database::new()?;
+    let bans = db.get_banned_ids()?;
+    let mut nicer_bans: Vec<&i64> = bans
+        .iter()
+        .collect();
+    let response: Vec<String> = nicer_bans.iter().map(|i|i.to_string()).collect();
+
+    Ok(HttpResponse::Ok().body(response.join("\n")))
+}

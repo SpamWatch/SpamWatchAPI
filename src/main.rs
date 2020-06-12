@@ -79,6 +79,10 @@ fn run() -> Result<i32, postgres::Error> {
                     .route(web::post().to(routes::banlist::post_bans)),
             )
             .service(
+                web::resource("/banlist/all")
+                    .route(web::get().to(routes::banlist::get_bans_id_list))
+            )
+            .service(
                 web::resource("/banlist/{id}")
                     .route(web::get().to(routes::banlist::get_ban))
                     .route(web::delete().to(routes::banlist::delete_ban)),
