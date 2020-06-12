@@ -28,7 +28,6 @@ fn setup_database() -> Result<i32, postgres::Error> {
             return Ok(1);
         }
     };
-    db.setup_tables()?;
     db.create_genesis_token()?;
     Ok(0)
 }

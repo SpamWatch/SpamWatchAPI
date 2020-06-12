@@ -68,44 +68,6 @@ impl Database {
         Ok(Database { conn })
     }
 
-    pub fn setup_tables(&mut self) -> Result<(), postgres::Error> {
-
-        let permission_enum = "
-            DO $$
-            BEGIN
-                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'permission') THEN
-                    CREATE TYPE permission AS ENUM ('User', 'Admin', 'Root');
-                END IF;
-            END$$;";
-        debug!(utils::LOGGER, "Creating type `permission` if it doesn't exist";
-            "query" => permission_enum, "name" => "banlist");
-        self.conn.simple_query(permission_enum)?;
-
-        let create_tokens = "
-            CREATE TABLE IF NOT EXISTS tokens (
-                id SERIAL PRIMARY KEY,
-                token Text NOT NULL,
-                permission permission NOT NULL,
-                userid bigint NOT NULL,
-                retired bool NOT NULL DEFAULT false);";
-
-        debug!(utils::LOGGER, "Creating Table if it doesn't exist";
-            "query" => create_tokens,  "name" => "tokens");
-        self.conn.simple_query(create_tokens)?;
-
-        let create_banlist = "
-            CREATE TABLE IF NOT EXISTS banlist (
-                id bigint NOT NULL PRIMARY KEY,
-                reason Text NOT NULL,
-                date timestamp NOT NULL,
-                admin_token integer references tokens(id) NOT NULL);";
-        debug!(utils::LOGGER, "Creating Table if it doesn't exist";
-            "query" => create_banlist, "name" => "banlist");
-        self.conn.simple_query(create_banlist)?;
-
-        Ok(())
-    }
-
     //region Tokens
     pub fn create_genesis_token(&mut self) -> Result<(), postgres::Error> {
         let get_genesis_token = "SELECT * FROM tokens WHERE id = 1;";
