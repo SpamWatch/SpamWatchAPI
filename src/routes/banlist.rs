@@ -12,6 +12,7 @@ use crate::utils;
 pub struct CreateBan {
     id: i64,
     reason: String,
+    message: Option<String>
 }
 
 pub fn get_bans(req: HttpRequest) -> Result<HttpResponse, UserError> {
@@ -43,7 +44,10 @@ pub fn post_bans(
         let mut db = Database::new()?;
         for ban in data.iter() {
             if !ban.reason.is_empty() {
-                db.add_ban(ban.id, &ban.reason, guard.token.id)?;
+                db.add_ban(ban.id,
+                           &ban.reason,
+                           guard.token.id,
+                           &ban.message)?;
             } else {
                 return Err(UserError::BadRequest);
             }

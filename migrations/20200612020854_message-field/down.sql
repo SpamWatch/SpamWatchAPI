@@ -1,0 +1,1 @@
+ALTER TABLE banlist DROP COLUMN IF EXISTS message;

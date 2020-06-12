@@ -29,6 +29,7 @@ pub struct Ban {
     pub reason: String,
     pub date: chrono::NaiveDateTime,
     pub admin: i32,
+    pub message: Option<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -57,7 +58,8 @@ impl Ban {
             "id": self.id,
             "reason": self.reason,
             "date": self.date.timestamp(),
-            "admin": self.admin
+            "admin": self.admin,
+            "message": self.message
         })
     }
 }
@@ -208,6 +210,7 @@ impl Database {
                 reason: row.get(1),
                 date: row.get(2),
                 admin: row.get(3),
+                message: row.try_get(4).unwrap_or(Some("test".to_string())),
             })
             .collect())
     }
@@ -233,15 +236,15 @@ impl Database {
         Ok(count)
     }
 
-    pub fn add_ban(&mut self, user_id: i64, reason: &String, admin_token: i32) -> Result<(), postgres::Error> {
+    pub fn add_ban(&mut self, user_id: i64, reason: &String, admin_token: i32, message: &Option<String>) -> Result<(), postgres::Error> {
         let upsert_ban = "
             INSERT INTO banlist
-            VALUES ($1, $2, now(), $3)
+            VALUES ($1, $2, now(), $3, $4)
             ON CONFLICT (id) DO
             UPDATE SET reason=EXCLUDED.reason, date=excluded.date;";
         debug!(utils::LOGGER, "Upserting ban";
             "id" => &user_id, "reason" => &reason, "query" => upsert_ban);
-        self.conn.query(upsert_ban, &[&user_id, &reason, &admin_token])?;
+        self.conn.query(upsert_ban, &[&user_id, &reason, &admin_token, &message])?;
         Ok(())
     }
 
@@ -257,6 +260,7 @@ impl Database {
                 reason: ban.get(1),
                 date: ban.get(2),
                 admin: ban.get(3),
+                message: ban.try_get(4).unwrap_or(None),
             }),
             None => None,
         })
