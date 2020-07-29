@@ -241,7 +241,7 @@ impl Database {
             INSERT INTO banlist
             VALUES ($1, $2, now(), $3, $4)
             ON CONFLICT (id) DO
-            UPDATE SET reason=EXCLUDED.reason, date=excluded.date;";
+            UPDATE SET reason=excluded.reason, date=excluded.date, message=excluded.message;";
         debug!(utils::LOGGER, "Upserting ban";
             "id" => &user_id, "reason" => &reason, "query" => upsert_ban);
         self.conn.query(upsert_ban, &[&user_id, &reason, &admin_token, &message])?;
