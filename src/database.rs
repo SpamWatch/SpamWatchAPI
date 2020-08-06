@@ -1,5 +1,3 @@
-use std::fmt;
-
 use chrono::NaiveDateTime;
 use postgres::{Client, Config, NoTls, Row};
 use serde::Serialize;
@@ -37,11 +35,6 @@ pub struct Antiflood {
     pub banlist_all: NaiveDateTime,
 }
 
-#[derive(Debug)]
-pub enum AntifloodColumn {
-    BanlistAll,
-}
-
 impl Token {
     pub fn json(&self) -> Result<Value, UserError> {
         Ok(serde_json::to_value(&self)?)
@@ -61,19 +54,6 @@ impl Ban {
             "admin": self.admin,
             "message": self.message
         })
-    }
-}
-
-impl fmt::Display for AntifloodColumn {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        // The `f` value implements the `Write` trait, which is what the
-        // write! macro is expecting. Note that this formatting ignores the
-        // various flags provided to format strings.
-
-        let name = match self {
-            AntifloodColumn::BanlistAll => "banlist_all"
-        };
-        write!(f, "{}", name)
     }
 }
 
@@ -270,7 +250,7 @@ impl Database {
         let delete_ban = "DELETE FROM banlist WHERE id = $1;";
         debug!(utils::LOGGER, "Deleting ban";
             "id" => user_id, "query" => delete_ban);
-        let row: Option<Row> = self.conn.query(delete_ban, &[&user_id])?.pop();
+        self.conn.query(delete_ban, &[&user_id])?.pop();
 
         Ok(())
     }

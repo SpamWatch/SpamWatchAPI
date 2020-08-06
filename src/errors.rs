@@ -95,7 +95,7 @@ impl UserError {
             UserError::MethodNotAllowed => HttpResponse::MethodNotAllowed().json(self.to_json()),
             UserError::Unauthorized => HttpResponse::Unauthorized().json(self.to_json()),
             UserError::Forbidden => HttpResponse::Forbidden().json(self.to_json()),
-            UserError::TooManyRequests {until} => HttpResponse::TooManyRequests().json(self.to_json()),
+            UserError::TooManyRequests { until: _ } => HttpResponse::TooManyRequests().json(self.to_json()),
         }
     }
 }

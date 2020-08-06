@@ -1,10 +1,9 @@
-use actix_web::{HttpResponse, HttpRequest};
-use serde_json::{json, Value};
+use actix_web::{HttpRequest, HttpResponse};
+use serde_json::json;
 
-use crate::{settings, utils};
-use crate::errors::UserError;
-use crate::guards::TokenGuard;
+use crate::settings;
 use crate::database::Database;
+use crate::errors::UserError;
 
 fn safe_href(name: &str, url: &str) -> String {
     format!(r#"<a rel="noopener" target="_blank" href="{}" class="white-no-dec-link">{}</a>"#, url, name)
@@ -42,7 +41,7 @@ pub fn version() -> HttpResponse {
     }))
 }
 
-pub fn stats(req: HttpRequest) -> Result<HttpResponse, UserError> {
+pub fn stats(_req: HttpRequest) -> Result<HttpResponse, UserError> {
     let mut db = Database::new()?;
     let total_ban_count = db.get_total_ban_count()?;
     let stats = json!({

@@ -1,8 +1,8 @@
-use chrono::{Duration, FixedOffset, NaiveDateTime, NaiveTime, Timelike, Utc};
+use chrono::{Duration, NaiveDateTime, Utc};
 use postgres_types::{FromSql, ToSql};
 use serde::{Deserialize, Serialize};
 
-use crate::database::{Antiflood, AntifloodColumn, Database};
+use crate::database::{Antiflood, Database};
 use crate::database::Token;
 use crate::errors::UserError;
 
@@ -61,7 +61,7 @@ impl TokenGuard {
 
     pub fn banlist_all(&mut self) -> Result<(), UserError> {
         if self.admin() {
-            return Ok(())
+            return Ok(());
         }
         let current_time = NaiveDateTime::from_timestamp(Utc::now().timestamp(), 0);
         if self.antiflood.banlist_all < current_time {

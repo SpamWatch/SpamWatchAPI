@@ -1,18 +1,17 @@
 use actix_web::{HttpRequest, HttpResponse, Result, web};
 use serde::Deserialize;
-use serde_json::{json, Value};
+use serde_json::Value;
 
-use crate::database::{Ban, Database, Token};
+use crate::database::Database;
 use crate::errors::UserError;
-use crate::guards::{Permission, TokenGuard};
-use crate::guards::Permission::User;
+use crate::guards::TokenGuard;
 use crate::utils;
 
 #[derive(Debug, Deserialize)]
 pub struct CreateBan {
     id: i64,
     reason: String,
-    message: Option<String>
+    message: Option<String>,
 }
 
 pub fn get_bans(req: HttpRequest) -> Result<HttpResponse, UserError> {
@@ -20,7 +19,7 @@ pub fn get_bans(req: HttpRequest) -> Result<HttpResponse, UserError> {
     if guard.root() {
         let mut db = Database::new()?;
         let bans = db.get_bans()?;
-        let mut nicer_bans: Vec<Value> = bans
+        let nicer_bans: Vec<Value> = bans
             .iter()
             .map(|ban| ban.raw_json())
             .collect();
@@ -59,7 +58,7 @@ pub fn post_bans(
 }
 
 pub fn get_ban(req: HttpRequest) -> Result<HttpResponse, UserError> {
-    let guard = TokenGuard::new(utils::get_auth_token(&req)?)?;
+    let _guard = TokenGuard::new(utils::get_auth_token(&req)?)?;
     let user_id: i64 = req.match_info().get("id").unwrap().parse().map_err(|e| {
         error!(utils::LOGGER, "{}", e);
         UserError::BadRequest
@@ -82,7 +81,7 @@ pub fn delete_ban(req: HttpRequest) -> Result<HttpResponse, UserError> {
         let mut db = Database::new()?;
 
         match db.get_ban(user_id)? {
-            Some(ban) => {
+            Some(_) => {
                 db.delete_ban(user_id)?;
                 Ok(HttpResponse::NoContent().body(""))
             }
@@ -98,7 +97,7 @@ pub fn get_bans_id_list(req: HttpRequest) -> Result<HttpResponse, UserError> {
     guard.banlist_all()?;
     let mut db = Database::new()?;
     let bans = db.get_banned_ids()?;
-    let mut nicer_bans: Vec<&i64> = bans
+    let nicer_bans: Vec<&i64> = bans
         .iter()
         .collect();
     let response: Vec<String> = nicer_bans.iter().map(|i| i.to_string()).collect();

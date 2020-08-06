@@ -1,11 +1,10 @@
-#[macro_use]
 extern crate postgres;
 #[macro_use]
 extern crate slog;
 
 use std::process::exit;
 
-use actix_web::{App, guard, HttpServer, web};
+use actix_web::{App, HttpServer, web};
 
 use crate::database::Database;
 use crate::errors::UserError;

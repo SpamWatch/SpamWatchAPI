@@ -2,9 +2,8 @@ use std::path::PathBuf;
 
 use config::{Config, ConfigError, Environment, File};
 use dirs::home_dir;
-use serde::{Deserialize, Serialize};
-
 use lazy_static::lazy_static;
+use serde::{Deserialize, Serialize};
 
 use crate::utils;
 

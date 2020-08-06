@@ -1,11 +1,9 @@
 use actix_web::{HttpRequest, HttpResponse, Result, web};
 use serde::Deserialize;
-use serde_json::Value;
 
-use crate::database::{Database, Token};
+use crate::database::Database;
 use crate::errors::UserError;
 use crate::guards::{Permission, TokenGuard};
-use crate::guards::Permission::User;
 use crate::utils;
 
 #[derive(Debug, Deserialize)]
@@ -83,7 +81,7 @@ pub fn delete_token(req: HttpRequest) -> Result<HttpResponse, UserError> {
             UserError::BadRequest
         })?;
         match db.get_token_by_id(token_id)? {
-            Some(token) => {
+            Some(_token) => {
                 db.revoke_token_by_id(token_id)?;
                 Ok(HttpResponse::NoContent().body(""))
             }

@@ -1,9 +1,8 @@
 use actix_web::HttpRequest;
+use lazy_static::lazy_static;
 use slog::{Drain, Logger};
 use slog_async;
 use slog_term;
-
-use lazy_static::lazy_static;
 
 use crate::errors::UserError;
 
