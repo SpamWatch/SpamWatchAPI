@@ -66,7 +66,7 @@ impl TokenGuard {
         let current_time = NaiveDateTime::from_timestamp(Utc::now().timestamp(), 0);
         if self.antiflood.banlist_all < current_time {
             self.db.set_antiflood_banlist_all(self.token.id,
-                                              current_time + Duration::minutes(30))?;
+                                              current_time + Duration::minutes(5))?;
             Ok(())
         } else {
             return Err(UserError::TooManyRequests { until: self.antiflood.banlist_all.timestamp() });
