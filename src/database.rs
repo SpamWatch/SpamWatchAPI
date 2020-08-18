@@ -134,6 +134,24 @@ impl Database {
         })
     }
 
+    pub fn get_token_by_userid(&mut self, userid: i64) -> Result<Vec<Token>, postgres::Error> {
+        let get_token_by_id = "SELECT * FROM tokens WHERE userid = $1;";
+        debug!(utils::LOGGER, "Getting token by userid";
+            "id" => userid, "query" => get_token_by_id);
+        let result: Vec<Row> = self.conn.query(get_token_by_id, &[&userid])?;
+
+        Ok(result
+            .into_iter()
+            .map(|row| Token {
+                id: row.get(0),
+                token: row.get(1),
+                permission: row.get(2),
+                userid: row.get(3),
+                retired: row.get(4),
+            })
+            .collect())
+    }
+
     pub fn get_token(&mut self, token: String) -> Result<Option<Token>, postgres::Error> {
         let get_token_by_id = "SELECT * FROM tokens WHERE token = $1;";
         debug!(utils::LOGGER, "Getting token"; "query" => get_token_by_id);

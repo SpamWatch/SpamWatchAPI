@@ -72,6 +72,10 @@ fn run() -> Result<i32, postgres::Error> {
                     .route(web::delete().to(routes::tokens::delete_token)),
             )
             .service(
+                web::resource("/tokens/userid/{uid}")
+                    .route(web::get().to(routes::tokens::get_token_by_userid))
+            )
+            .service(
                 web::resource("/banlist")
                     .route(web::get().to(routes::banlist::get_bans))
                     .route(web::post().to(routes::banlist::post_bans)),
