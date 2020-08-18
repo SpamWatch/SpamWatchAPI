@@ -19,7 +19,7 @@ pub fn info() -> HttpResponse {
         "
         <style>* {{font-family: monospace;}}</style>
         {}
-        {} v{} by {}<br>{}<br><br>{}<br>{}<br>{}",
+        {} v{} by {}<br>{}<br><br>{}<br>{}<br>{}<br>{}",
         staging_prefix,
         &env!("CARGO_PKG_NAME"),
         &env!("CARGO_PKG_VERSION"),
@@ -27,7 +27,8 @@ pub fn info() -> HttpResponse {
         &env!("CARGO_PKG_DESCRIPTION"),
         safe_href("GitHub", &env!("CARGO_PKG_REPOSITORY")),
         safe_href("Channel", "https://t.me/SpamWatch"),
-        safe_href("Documentation", "https://docs.spamwat.ch")
+        safe_href("Documentation", "https://docs.spamwat.ch"),
+        safe_href("Get an access token", "https://t.me/SpamWatchBot?start=token")
     );
     HttpResponse::Ok().content_type("text/html").body(body)
 }
