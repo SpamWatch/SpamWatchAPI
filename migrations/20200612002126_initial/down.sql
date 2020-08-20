@@ -1,5 +1,5 @@
-DROP TYPE permission;
+DROP TABLE banlist;
 
 DROP TABLE tokens;
 
-DROP TABLE banlist;
+DROP TYPE permission CASCADE;
