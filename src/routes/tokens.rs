@@ -41,7 +41,7 @@ pub fn post_tokens(
             None => Err(UserError::NotFound),
         }
     } else {
-        Err(UserError::Unauthorized)
+        Err(UserError::Forbidden)
     }
 }
 
@@ -65,7 +65,7 @@ pub fn get_token(req: HttpRequest) -> Result<HttpResponse, UserError> {
                 None => Err(UserError::NotFound),
             }
         } else {
-            Err(UserError::Unauthorized)
+            Err(UserError::Forbidden)
         }
     }
 }
@@ -88,7 +88,7 @@ pub fn get_token_by_userid(req: HttpRequest) -> Result<HttpResponse, UserError> 
 
         Ok(HttpResponse::Ok().json(tokens_json))
     } else {
-        Err(UserError::Unauthorized)
+        Err(UserError::Forbidden)
     }
 }
 
@@ -108,6 +108,6 @@ pub fn delete_token(req: HttpRequest) -> Result<HttpResponse, UserError> {
             None => Err(UserError::NotFound),
         }
     } else {
-        Err(UserError::Unauthorized)
+        Err(UserError::Forbidden)
     }
 }
