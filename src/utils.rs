@@ -21,13 +21,12 @@ lazy_static! {
 pub fn get_auth_token(req: &HttpRequest) -> Result<String, UserError> {
     let token_header = match req.headers().get("authorization") {
         Some(v) => v.to_str().map_err(|e| {
-            error!(LOGGER, "{}", e);
-            UserError::BadRequest
+            UserError::BadRequest("could not convert token into string")
         })?,
         None => {
             return Err(UserError::Unauthorized);
         }
     };
     let _token: Vec<&str> = token_header.split_ascii_whitespace().collect();
-    Ok(_token.get(1).ok_or(UserError::BadRequest)?.to_string())
+    Ok(_token.get(1).ok_or(UserError::BadRequest("could not find token. is it prefixed with `Bearer` ?"))?.to_string())
 }

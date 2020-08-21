@@ -13,7 +13,7 @@ use crate::utils;
 pub enum UserError {
     Internal,
     NotFound,
-    BadRequest,
+    BadRequest(&'static str),
     MethodNotAllowed,
     Unauthorized,
     Forbidden,
@@ -63,9 +63,10 @@ impl UserError {
                 "code": StatusCode::NOT_FOUND.as_u16(),
                 "error": StatusCode::NOT_FOUND.canonical_reason()
             }),
-            UserError::BadRequest => json!({
+            UserError::BadRequest(reason) => json!({
                 "code": StatusCode::BAD_REQUEST.as_u16(),
-                "error": StatusCode::BAD_REQUEST.canonical_reason()
+                "error": StatusCode::BAD_REQUEST.canonical_reason(),
+                "reason": reason
             }),
             UserError::MethodNotAllowed => json!({
                 "code": StatusCode::METHOD_NOT_ALLOWED.as_u16(),
@@ -91,7 +92,7 @@ impl UserError {
         match *self {
             UserError::Internal => HttpResponse::InternalServerError().json(self.to_json()),
             UserError::NotFound => HttpResponse::NotFound().json(self.to_json()),
-            UserError::BadRequest => HttpResponse::BadRequest().json(self.to_json()),
+            UserError::BadRequest(_) => HttpResponse::BadRequest().json(self.to_json()),
             UserError::MethodNotAllowed => HttpResponse::MethodNotAllowed().json(self.to_json()),
             UserError::Unauthorized => HttpResponse::Unauthorized().json(self.to_json()),
             UserError::Forbidden => HttpResponse::Forbidden().json(self.to_json()),
