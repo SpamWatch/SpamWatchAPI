@@ -20,7 +20,7 @@ lazy_static! {
 
 pub fn get_auth_token(req: &HttpRequest) -> Result<String, UserError> {
     let token_header = match req.headers().get("authorization") {
-        Some(v) => v.to_str().map_err(|e| {
+        Some(v) => v.to_str().map_err(|_| {
             UserError::BadRequest("could not convert token into string")
         })?,
         None => {

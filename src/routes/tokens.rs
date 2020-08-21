@@ -57,7 +57,7 @@ pub fn get_token(req: HttpRequest) -> Result<HttpResponse, UserError> {
         }
     } else {
         if guard.root() {
-            let token_id: i32 = _id.parse().map_err(|e| {
+            let token_id: i32 = _id.parse().map_err(|_| {
                 UserError::BadRequest("could not convert token id to integer")
             })?;
             match db.get_token_by_id(token_id)? {
@@ -77,7 +77,7 @@ pub fn get_token_by_userid(req: HttpRequest) -> Result<HttpResponse, UserError> 
     let uid = req.match_info().get("uid").unwrap();
 
     if guard.root() {
-        let uid: i64 = uid.parse().map_err(|e| {
+        let uid: i64 = uid.parse().map_err(|_| {
             UserError::BadRequest("could not convert user id to integer")
         })?;
         let tokens = db.get_token_by_userid(uid)?;
@@ -97,7 +97,7 @@ pub fn delete_token(req: HttpRequest) -> Result<HttpResponse, UserError> {
 
     if guard.root() {
         let mut db = Database::new()?;
-        let token_id: i32 = req.match_info().get("id").unwrap().parse().map_err(|e| {
+        let token_id: i32 = req.match_info().get("id").unwrap().parse().map_err(|_| {
             UserError::BadRequest("could not convert token id to integer")
         })?;
         match db.get_token_by_id(token_id)? {
